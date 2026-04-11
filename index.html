@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Eagle+Lake&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      overflow-wrap: break-word; 
+    }
+
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    body {
+      background-color: #0f0f0f;
+      color: #d4d4d4;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 20px;
+      margin: 0;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+      padding-bottom: 20px;
+      margin-bottom: 15px;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .site-logo {
+      height: 60px; /* Aap apne hisaab se height kam ya zyada kar sakte hain */
+      width: auto;
+      margin: 0;
+    }   
+ 
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+    #search-input {
+      background-color: #1a1a1a;
+      color: #d4d4d4;
+      border: none;
+      padding: 8px 15px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 16px;
+      border-radius: 20px;
+      outline: none;
+      width: 200px;
+    }
+    #search-input::placeholder {
+      color: #666;
+    }
+
+    #sub-title {
+      color: #8b949e;
+      font-size: 16px;
+      margin-bottom: 25px;
+      font-family: 'Courier New', Courier, monospace;
+      display: none; 
+    }
+    
+    .article {
+      margin-bottom: 25px;
+    }
+    .article-title {
+      font-size: 18px;
+      font-weight: normal;
+      font-family: 'Times New Roman', serif;
+      color: #e6e6e6;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 5px;
+      line-height: 1.3;
+    }
+    .article-title:hover {
+      text-decoration: underline;
+    }
+    .article-meta {
+      font-size: 12px;
+      color: #8b949e;
+      margin: 5px 0;
+    }
+    .article-link {
+      font-size: 12px;
+      color: #555;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .article-link:hover {
+      color: #888;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 15px; }
+      .header {
+        flex-direction: column; 
+        align-items: center;
+        border-bottom: none; 
+        margin-bottom: 10px;
+        gap: 15px;
+      }
+      .title-group { gap: 10px; }
+      
+      .site-logo { 
+        height: 45px; /* Mobile par logo thoda chota dikhega */
+      }
+      
+      .controls {
+        flex-direction: column;
+        width: 100%;
+      }
+      #search-input {
+        width: 100%; 
+        border-radius: 20px; 
+      }
+    }
+
+    .loading-text {
+      color: #8b949e; 
+      font-family: 'Courier New', Courier, monospace; 
+      font-size: 16px; 
+      text-transform: none !important;
+      text-align: left; 
+      margin-top: 20px; 
+    }
+
+    .loading-dots::after {
+      content: '';
+      animation: animate-dots 1.5s infinite;
+    }
+
+    @keyframes animate-dots {
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75%, 100% { content: '...'; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="/" class="title-group" style="text-decoration: none; cursor: pointer;">
+      <img src="Paperlytic.png" alt="Paperlytic Logo" class="site-logo">
+    </a>
+
+    <div class="controls">
+      <input type="text" id="search-input" placeholder="Search..." oninput="filterData()">
+    </div>
+  </div>
+
+  <div id="sub-title"></div>
+
+  <div id="feed-container"></div>
+
+  <script>
+    const SUPABASE_URL = "https://wmdmqpttcqooqmhfprrm.supabase.co/rest/v1/articles";
+    const SUPABASE_KEY = "sb_publishable_lix4VU1K7-D1iExVmaL5lw_qRWPeggY";
+
+    let currentOffset = 0;
+    const limit = 50; // Ek baar me 50 papers aayenge
+    let isLoading = false;
+    let hasMore = true;
+    let currentSearchTerm = "";
+
+    // 1. Page load hote hi pehli batch fetch karo
+    fetchArticles(false);
+
+    // 2. Scroll Tracker (Pata lagata hai user neeche pahuncha ya nahi)
+    window.addEventListener('scroll', () => {
+      // Agar user page ke bottom se thoda upar hai, toh naya data mangwao
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
+        fetchArticles(false);
+      }
+    });
+
+    // 3. Smart Search Function
+    function filterData() {
+      const searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+      const subTitle = document.getElementById('sub-title');
+
+      if (searchQuery === currentSearchTerm) return; // Same word par dobara load mat karo
+      
+      currentSearchTerm = searchQuery;
+
+      if (currentSearchTerm === "") {
+        subTitle.style.display = "none";
+      } else {
+        subTitle.innerText = `Search: "${currentSearchTerm}"`;
+        subTitle.style.display = "block";
+      }
+      
+      // Nayi search par purana data clear karke fresh database fetch karo
+      fetchArticles(true);
+    }
+
+    // 4. Main Fetch Engine
+    function fetchArticles(isNewSearch = false) {
+      if (isLoading) return;
+      if (!hasMore && !isNewSearch) return; // Agar aur data nahi hai, toh mat dhoondho
+
+      isLoading = true;
+      const container = document.getElementById('feed-container');
+
+      if (isNewSearch || currentOffset === 0) {
+     currentOffset = 0;
+     hasMore = true;
+     container.innerHTML = ""; // Har nayi search ya pehle load par screen saaf
+    }
+
+      // Niche loading text dikhao
+      const loadingDiv = document.createElement('div');
+      loadingDiv.id = "scroll-loading";
+      loadingDiv.innerHTML = `<p class="loading-text" style="text-align: center;">Loading more<span class="loading-dots"></span></p>`;
+      container.appendChild(loadingDiv);
+
+      // URL Taiyar karo (Server side search + Pagination + Timestamp sorting)
+      let fetchUrl = `${SUPABASE_URL}?select=*&order=created_at.desc&limit=${limit}&offset=${currentOffset}`;
+
+      if (currentSearchTerm !== "") {
+        // Supabase ko bolo title ya journal me search kare
+        fetchUrl += `&or=(title.ilike.*${encodeURIComponent(currentSearchTerm)}*,journal.ilike.*${encodeURIComponent(currentSearchTerm)}*)`;
+      }
+
+      fetch(fetchUrl, {
+        method: "GET",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "Content-Type": "application/json"
+        }
+      })
+      .then(async res => {
+        if (!res.ok) throw new Error("API Error");
+        return res.json();
+      })
+      .then(data => {
+        document.getElementById('scroll-loading')?.remove(); 
+
+        if (data.length < limit) {
+          hasMore = false; // Database me aur papers nahi bache
+        }
+
+        if (data.length === 0 && isNewSearch) {
+           container.innerHTML = "<p>No articles found.</p>";
+        } else {
+           displayArticles(data);
+           currentOffset += limit; // Agli load ke liye position badha do
+        }
+
+        isLoading = false;
+      })
+      .catch(err => {
+        isLoading = false;
+        document.getElementById('scroll-loading')?.remove();
+        showError(err);
+      });
+    }
+
+    function showError(error) {
+      const container = document.getElementById('feed-container');
+      container.innerHTML += `<p style='color: #ff5555;'>🚨 Error: ${error.message}</p>`;
+    }
+
+    function displayArticles(articles) {
+      const container = document.getElementById('feed-container');
+
+      articles.forEach(row => {
+        const date = row.date || "Unknown Date";
+        const title = row.title || "No Title";
+        const journal = row.journal || "Unknown Journal";
+        const doi = row.doi || "";
+
+        const doiLink = doi ? "https://doi.org/" + doi : "#";
+
+        const articleDiv = document.createElement('div');
+        articleDiv.className = 'article';
+        articleDiv.innerHTML = `
+          <a class="article-title" href="${doiLink}" target="_blank">${title}</a>
+          <div class="article-meta">${new Date(date).toDateString()} | ${journal}</div>
+          <a class="article-link" href="${doiLink}" target="_blank">${doiLink}</a>
+        `;
+        container.appendChild(articleDiv);
+      });
+    }
+  </script>
+</body>
+</html>
