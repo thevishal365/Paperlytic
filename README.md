@@ -25,7 +25,7 @@ Paperlytic: System Architecture Diagram
 [ 3 ] THE VAULT (Database & Storage)
   │
   ├── 🗄️ Supabase (PostgreSQL Database)
-  │      ↳ Table: `articles` (date, doi, title, journal, subject)
+  │      ↳ Table: `articles` (date, doi, title, journal)
   │      ↳ Speed: Handles API requests in milliseconds.
   │      ↳ 🧹 Auto-Cleaner: pg_cron (Runs daily at 03:00) 
   │          ↳ Deletes old data once the storage limit is exceeded.
