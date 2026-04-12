@@ -47,7 +47,7 @@
     }
 
     .site-logo {
-      height: 60px; /* Aap apne hisaab se height kam ya zyada kar sakte hain */
+      height: 60px; /* Adjust the height as required */
       width: auto;
       margin: 0;
     }   
@@ -122,7 +122,7 @@
       .title-group { gap: 10px; }
       
       .site-logo { 
-        height: 45px; /* Mobile par logo thoda chota dikhega */
+        height: 45px; /* Logo will be slightly smaller on mobile */
       }
       
       .controls {
@@ -178,17 +178,17 @@
     const SUPABASE_KEY = "sb_publishable_lix4VU1K7-D1iExVmaL5lw_qRWPeggY";
 
     let currentOffset = 0;
-    const limit = 50; // Ek baar me 50 papers aayenge
+    const limit = 50; // Fetch 50 papers at a time
     let isLoading = false;
     let hasMore = true;
     let currentSearchTerm = "";
 
-    // 1. Page load hote hi pehli batch fetch karo
+    // 1. Fetch the initial batch on page load
     fetchArticles(false);
 
-    // 2. Scroll Tracker (Pata lagata hai user neeche pahuncha ya nahi)
+    // 2. Scroll Tracker (Detects if the user has reached the bottom)
     window.addEventListener('scroll', () => {
-      // Agar user page ke bottom se thoda upar hai, toh naya data mangwao
+      // Fetch new data when the user is near the bottom of the page
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
         fetchArticles(false);
       }
@@ -199,7 +199,7 @@
       const searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
       const subTitle = document.getElementById('sub-title');
 
-      if (searchQuery === currentSearchTerm) return; // Same word par dobara load mat karo
+      if (searchQuery === currentSearchTerm) return; // Do not reload for the same search query
       
       currentSearchTerm = searchQuery;
 
@@ -210,14 +210,14 @@
         subTitle.style.display = "block";
       }
       
-      // Nayi search par purana data clear karke fresh database fetch karo
+      // Clear previous data and fetch fresh results for a new search
       fetchArticles(true);
     }
 
     // 4. Main Fetch Engine
     function fetchArticles(isNewSearch = false) {
       if (isLoading) return;
-      if (!hasMore && !isNewSearch) return; // Agar aur data nahi hai, toh mat dhoondho
+      if (!hasMore && !isNewSearch) return; // Do not fetch if there is no more data available
 
       isLoading = true;
       const container = document.getElementById('feed-container');
@@ -225,20 +225,20 @@
       if (isNewSearch || currentOffset === 0) {
      currentOffset = 0;
      hasMore = true;
-     container.innerHTML = ""; // Har nayi search ya pehle load par screen saaf
+     container.innerHTML = ""; // Clear the screen for a new search or initial load
     }
 
-      // Niche loading text dikhao
+      // Show loading text at the bottom
       const loadingDiv = document.createElement('div');
       loadingDiv.id = "scroll-loading";
       loadingDiv.innerHTML = `<p class="loading-text" style="text-align: center;">Loading more<span class="loading-dots"></span></p>`;
       container.appendChild(loadingDiv);
 
-      // URL Taiyar karo (Server side search + Pagination + Timestamp sorting)
+      // Construct the URL (Server-side search + Pagination + Timestamp sorting)
       let fetchUrl = `${SUPABASE_URL}?select=*&order=created_at.desc&limit=${limit}&offset=${currentOffset}`;
 
       if (currentSearchTerm !== "") {
-        // Supabase ko bolo title ya journal me search kare
+        // Query Supabase to search within the title or journal
         fetchUrl += `&or=(title.ilike.*${encodeURIComponent(currentSearchTerm)}*,journal.ilike.*${encodeURIComponent(currentSearchTerm)}*)`;
       }
 
@@ -258,14 +258,14 @@
         document.getElementById('scroll-loading')?.remove(); 
 
         if (data.length < limit) {
-          hasMore = false; // Database me aur papers nahi bache
+          hasMore = false; // No further papers remaining in the database
         }
 
         if (data.length === 0 && isNewSearch) {
            container.innerHTML = "<p>No articles found.</p>";
         } else {
            displayArticles(data);
-           currentOffset += limit; // Agli load ke liye position badha do
+           currentOffset += limit; // Increment the offset for the next load
         }
 
         isLoading = false;
