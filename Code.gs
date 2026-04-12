@@ -4,7 +4,6 @@ const MAX_ROWS = 100000;
 function fetchLatestDOIs() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   const existingDois = getExistingDois(sheet);
-
   const subjectsToSearch = [
     "Physics", 
     "Chemistry", 
@@ -29,11 +28,9 @@ function fetchLatestDOIs() {
   ];
 
   const newRowsData = [];
-
   for (const subject of subjectsToSearch) {
     Logger.log(`Fetching articles for: ${subject}`);
     const url = `https://api.crossref.org/works?query=${encodeURIComponent(subject)}&sort=created&order=desc&rows=10`;
-    
     let response = null;
     let success = false;
 
@@ -47,14 +44,13 @@ function fetchLatestDOIs() {
       } catch (e) {
         // Retry logic
       }
-      if (!success && attempt < 3) Utilities.sleep(2000); 
+      if (!success && attempt < 3) Utilities.sleep(2000);
     }
 
     if (!success) continue; 
 
     const data = JSON.parse(response.getContentText());
     const items = data.message.items;
-
     for (const item of items) {
       const doi = item.DOI;
       if (!existingDois.has(doi)) {
@@ -63,9 +59,9 @@ function fetchLatestDOIs() {
         const createdDate = item.created && item.created["date-time"]
           ? item.created["date-time"].split("T")[0]
           : "Unknown Date";
-        
-        // Exact 4 columns: Date, DOI, Title, Journal
-        newRowsData.push([createdDate, doi, title, journal]); 
+          
+        // Exactly 4 columns: Date, DOI, Title, Journal
+        newRowsData.push([createdDate, doi, title, journal]);
       }
     }
   }
@@ -76,7 +72,7 @@ function fetchLatestDOIs() {
     }
 
     newRowsData.reverse();
-    const numColumns = 4; // Column count 4 kar diya
+    const numColumns = 4; // Set column count to 4
 
     sheet.insertRowsAfter(1, newRowsData.length);
     sheet.getRange(2, 1, newRowsData.length, numColumns).setValues(newRowsData);
@@ -126,20 +122,19 @@ function doGet() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   const data = sheet.getDataRange().getDisplayValues();
   data.shift();
-
   return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
-// Yeh function web page ko sheet ka saara data deta hai
+// This function provides all sheet data to the web page
 function getSheetData() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   
-  // 🔥 YAHAN CHANGE KIYA HAI: getValues() ki jagah getDisplayValues()
+  // 🔥 CHANGE MADE HERE: Replaced getValues() with getDisplayValues()
   const data = sheet.getDataRange().getDisplayValues(); 
   
-  data.shift(); // Pehli row (Headers) hata do
+  data.shift(); // Remove the first row (headers)
   return data; 
 }
 
@@ -153,7 +148,7 @@ function sendToSupabase(newRowsData) {
     title: row[2],
     journal: row[3]
   }));
-
+  
   const options = {
     method: "post",
     contentType: "application/json",
@@ -164,11 +159,11 @@ function sendToSupabase(newRowsData) {
     },
     payload: JSON.stringify(payload)
   };
-
+  
   try {
     UrlFetchApp.fetch(SUPABASE_URL, options);
-    Logger.log("Supabase me data chala gaya!");
+    Logger.log("Data successfully sent to Supabase!");
   } catch (e) {
-    Logger.log("Error aaya: " + e.message);
+    Logger.log("Error encountered: " + e.message);
   }
 }
