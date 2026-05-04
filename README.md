@@ -35,7 +35,7 @@ Paperlytic: System Architecture
 [ 4 ] The Frontend UI
   │
   ├── 💻 Netlify Hosting / Web Browser
-  │      ↳ File: index.html (HTML/CSS/JS)
+  │      ↳ File: index.html (HTML/CSS/Vanilla JS)
   │      ↳ Action: Connects directly to Supabase without a middleman server.
   │      ↳ UI Logic: Powers a live search bar and generates direct DOI links.
   │      ↳ End User: Experiences a fast, real time research feed.
