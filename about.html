@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About - Paperlytic</title>
+  
+  <style>
+    * { box-sizing: border-box; overflow-wrap: break-word; }
+    html, body { max-width: 100vw; overflow-x: hidden; }
+
+    body {
+      background-color: #f0f4f8; 
+      color: #1a202c;            
+      font-family: 'Courier New', Courier, monospace;
+      padding: 20px;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* --- Header & Logo Styles --- */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #d1d9e0; 
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #111111;
+    }
+
+    .css-logo-icon {
+      width: 30px;
+      height: 38px;
+      border: 4px solid currentColor;
+      border-radius: 4px;
+      position: relative;
+      clip-path: polygon(0% 0%, 65% 0%, 100% 25%, 100% 100%, 0% 100%);
+    }
+
+    .css-logo-icon::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 10px;
+      height: 10px;
+      border-left: 4px solid currentColor;
+      border-bottom: 4px solid currentColor;
+      border-bottom-left-radius: 3px;
+      background-color: #f0f4f8; 
+    }
+
+    .css-logo-text {
+      font-family: 'Arial', sans-serif;
+      font-size: 35px;
+      font-weight: 600;
+      letter-spacing: -1px;
+      margin: 0;
+    }
+
+    /* --- Navigation Menu Styles --- */
+    .nav-menu {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .nav-menu a {
+      color: #2b5c8f; 
+      text-decoration: none;
+      font-family: 'Arial', sans-serif;
+      font-size: 14px;
+      border-bottom: 1px solid #2b5c8f; 
+      padding-bottom: 2px;
+    }
+
+    .nav-menu a:hover {
+      color: #111111; 
+      border-bottom: 2px solid #111111; 
+    }
+
+    /* --- About Section Content Styles --- */
+    .about-container {
+      max-width: 800px;
+      margin: 0 auto;
+      font-family: 'Times New Roman', serif;
+      font-size: 18px;
+      color: #111111;
+    }
+
+    .about-container h1 {
+      font-family: 'Arial', sans-serif;
+      font-size: 20px;
+      margin-bottom: 20px;
+      letter-spacing: -0.5px;
+    }
+
+    .about-container h2 {
+      font-family: 'Arial', sans-serif;
+      font-size: 20px;
+      margin-top: 30px;
+      margin-bottom: 10px;
+      color: #2b5c8f;
+    }
+
+    .about-container p {
+      margin-bottom: 15px;
+    }
+
+    .about-container ul {
+      margin-bottom: 25px;
+      padding-left: 20px;
+    }
+
+    .about-container li {
+      margin-bottom: 10px;
+    }
+
+    /* --- Mobile Responsive --- */
+    @media (max-width: 600px) {
+      .header {
+        flex-direction: column; 
+        align-items: center;
+        border-bottom: none; 
+        gap: 15px;
+      }
+      .css-logo-text { font-size: 26px; }
+      .css-logo-icon { width: 24px; height: 30px; }
+      .nav-menu { margin-bottom: 10px; }
+      .about-container { font-size: 16px; padding: 0 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header & Navigation -->
+  <div class="header">
+    <a href="/" class="title-group logo-wrapper">
+      <span class="css-logo-icon"></span>
+      <span class="css-logo-text">Paperlytic</span>
+    </a>
+
+    <nav class="nav-menu">
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="https://x.com/thevishal365" target="_blank" rel="noopener noreferrer">Contact</a>
+    </nav>
+  </div>
+
+  <!-- About Page Content -->
+  <div class="about-container">
+    <h1>About Paperlytic</h1>
+    
+    <p>Paperlytic is an automated, real-time feed designed to track and aggregate the latest academic research papers.</p>
+
+    <p>How the system works:</p>
+
+    <ul>
+      <li><strong>The Data Source:</strong> The system constantly pulls raw data directly from the Crossref API, which acts as a global database for newly published academic work.</li>
+      <li><strong>The Engine:</strong> A serverless Google Apps Script runs autonomously every hour. It fetches new papers, filters out duplicates, formats the data, and ensures everything is clean before pushing it forward.</li>
+      <li><strong>The Brain:</strong> The processed data is stored in Supabase (a lightning fast PostgreSQL database). It handles API requests in milliseconds. To keep the system lightweight and efficient, an automated background job (pg_cron) runs daily to delete old data once storage limits are reached.</li>
+      <li><strong>The Interface:</strong> Hosted on Netlify, this frontend connects directly to the database without a middleman server. The result is a minimalist, high speed user interface with live search capabilities and direct DOI links to the original papers.</li>
+    </ul>
+
+    <p>No clutter. No unnecessary steps. Just a clean pipeline bringing the latest research straight to your screen.</p>
+  </div>
+
+</body>
+</html>
