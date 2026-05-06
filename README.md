@@ -6,7 +6,7 @@ Paperlytic: System Architecture
 
 [ 1 ] The Data Source
   │
-  ├── 🌍 Core API
+  ├── 🌍 Croosref API
   │      ↳ Role: A global database of the latest research papers.
   │      ↳ Action: Provides data in raw JSON format.
   │
