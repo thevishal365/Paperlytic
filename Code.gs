@@ -46,8 +46,7 @@ function fetchLatestDOIs() {
     for (const item of items) {
       const doi = item.DOI;
       if (doi && !existingDois.has(doi)) {
-        let rawTitle = item.title ? item.title[0] : "No Title";
-        const title = rawTitle.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+        const title = item.title ? item.title[0] : "No Title";
         let rawJournal = item["container-title"] ? item["container-title"][0] : "Unknown Journal";
         const journal = rawJournal.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
         const createdDate = item.created && item.created["date-time"]
