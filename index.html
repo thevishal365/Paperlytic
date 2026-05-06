@@ -26,7 +26,7 @@
     }
 
     body {
-      background-color: #f0f4f8; /* News Minimalist style light gray/off-white */
+      background-color: #f0f4f8; /* Minimalist style light gray/off white */
       color: #1a202c;            /* Dark text for high readability */
       font-family: 'Courier New', Courier, monospace;
       padding: 20px;
@@ -59,7 +59,7 @@
     .css-logo-icon {
       width: 30px;
       height: 38px;
-      border: 4px solid currentColor;
+      border: 3px solid currentColor;
       border-radius: 4px;
       position: relative;
       clip-path: polygon(0% 0%, 65% 0%, 100% 25%, 100% 100%, 0% 100%);
@@ -72,8 +72,8 @@
       right: -3px;
       width: 10px;
       height: 10px;
-      border-left: 4px solid currentColor;
-      border-bottom: 4px solid currentColor;
+      border-left: 3px solid currentColor;
+      border-bottom: 3px solid currentColor;
       border-bottom-left-radius: 3px;
       background-color: #f0f4f8; /* Match this with your body background */
     }
@@ -81,7 +81,7 @@
     .css-logo-text {
       font-family: 'Arial', sans-serif;
       font-size: 35px;
-      font-weight: 600;
+      font-weight: 500;
       letter-spacing: -1px;
       margin: 0;
     }
@@ -89,6 +89,26 @@
     .controls {
       display: flex;
       gap: 10px;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .nav-menu a {
+      color: #2b5c8f; /* Blue link color */
+      text-decoration: none;
+      font-family: 'Arial', sans-serif;
+      font-size: 14px;
+      border-bottom: 1px solid #2b5c8f; /* Thin underline */
+      padding-bottom: 2px;
+    }
+
+    .nav-menu a:hover {
+      color: #111111; /* Hover dark/black */
+      border-bottom: 2px solid #111111; 
     }
     #search-input {
       background-color: #ffffff; /* White background for search */
@@ -145,7 +165,11 @@
     }
 
     @media (max-width: 600px){
+      .nav-menu {
+        margin-bottom: 10px;
+      }
       body { padding: 15px; }
+      
       .header {
         flex-direction: column; 
         align-items: center;
@@ -208,6 +232,15 @@
       <span class="css-logo-icon"></span>
       <span class="css-logo-text">Paperlytic</span>
     </a>
+
+    <nav class="nav-menu">
+  
+      <a href="/">Home</a>
+      
+      <a href="/about.html">About</a>
+      
+      <a href="https://x.com/thevishal365" target="_blank" rel="noopener noreferrer">Contact</a>
+    </nav>
 
     <div class="controls">
       <input type="text" id="search-input" placeholder="Search..." oninput="filterData()">
