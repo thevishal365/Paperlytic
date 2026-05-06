@@ -86,6 +86,12 @@
       border-bottom: 2px solid #111111; 
     }
 
+    .made-by {
+      font-family: 'Arial', sans-serif;
+      font-size: 14px;       /* Same size as Home/About/Contact */
+      color: #2b5c8f;        /* Same blue color as Home/About/Contact */ 
+    }
+
     /* --- About Section Content Styles --- */
     .about-container {
       max-width: 800px;
@@ -150,7 +156,8 @@
     <nav class="nav-menu">
       <a href="/">Home</a>
       <a href="/about.html">About</a>
-      <a href="https://x.com/thevishal365" target="_blank" rel="noopener noreferrer">Contact</a>
+      <a href="mailto:vishaltenet@gmail.com">Contact</a>
+      <a href="https://x.com/thevishal365" target="_blank" rel="noopener noreferrer">Made by Vishal</a>
     </nav>
   </div>
 
@@ -158,14 +165,14 @@
   <div class="about-container">
     <h1>About Paperlytic</h1>
     
-    <p>Paperlytic is an automated, real-time feed designed to track and aggregate the latest academic research papers.</p>
+    <p>Paperlytic is an automated, real time feed designed to track and aggregate the latest academic research papers.</p>
 
     <p>How the system works:</p>
 
     <ul>
       <li><strong>The Data Source:</strong> The system constantly pulls raw data directly from the Crossref API, which acts as a global database for newly published academic work.</li>
       <li><strong>The Engine:</strong> A serverless Google Apps Script runs autonomously every hour. It fetches new papers, filters out duplicates, formats the data, and ensures everything is clean before pushing it forward.</li>
-      <li><strong>The Brain:</strong> The processed data is stored in Supabase (a lightning fast PostgreSQL database). It handles API requests in milliseconds. To keep the system lightweight and efficient, an automated background job (pg_cron) runs daily to delete old data once storage limits are reached.</li>
+      <li><strong>The Brain:</strong> The processed data is stored in Supabase a fast PostgreSQL database. To keep the system lightweight and efficient, an automated background job (pg_cron) runs daily to delete old data once storage limits are reached.</li>
       <li><strong>The Interface:</strong> Hosted on Netlify, this frontend connects directly to the database without a middleman server. The result is a minimalist, high speed user interface with live search capabilities and direct DOI links to the original papers.</li>
     </ul>
 
