@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Eagle+Lake&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500&display=swap" rel="stylesheet">
 
   <style>
     * {
@@ -25,8 +26,8 @@
     }
 
     body {
-      background-color: #0f0f0f;
-      color: #d4d4d4;
+      background-color: #f0f4f8; /* News Minimalist style light gray/off-white */
+      color: #1a202c;            /* Dark text for high readability */
       font-family: 'Courier New', Courier, monospace;
       padding: 20px;
       margin: 0;
@@ -35,9 +36,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #d1d9e0; /* Subtle light border */
       padding-bottom: 20px;
-      margin-bottom: 15px;
+      margin-bottom: 25px;
     }
 
     .title-group {
@@ -46,29 +47,74 @@
       gap: 15px;
     }
 
-    .site-logo {
-      height: 60px; /* Adjust the height as required */
-      width: auto;
+    .logo-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #111111;
+      cursor: pointer;
+    }
+
+    .css-logo-icon {
+      width: 30px;
+      height: 38px;
+      border: 4px solid currentColor;
+      border-radius: 4px;
+      position: relative;
+      clip-path: polygon(0% 0%, 65% 0%, 100% 25%, 100% 100%, 0% 100%);
+    }
+
+    .css-logo-icon::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 10px;
+      height: 10px;
+      border-left: 4px solid currentColor;
+      border-bottom: 4px solid currentColor;
+      border-bottom-left-radius: 3px;
+      background-color: #f0f4f8; /* Match this with your body background */
+    }
+
+    .css-logo-icon::after {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 6px;
+      width: 12px;
+      height: 3px;
+      background-color: currentColor;
+      box-shadow: 0 6px 0 0 currentColor, 0 12px 0 0 currentColor;
+      border-radius: 1px;
+    }
+
+    .css-logo-text {
+      font-family: 'Arial', sans-serif;
+      font-size: 35px;
+      font-weight: 600;
+      letter-spacing: -1px;
       margin: 0;
-    }   
- 
+    }
+
     .controls {
       display: flex;
       gap: 10px;
     }
     #search-input {
-      background-color: #1a1a1a;
-      color: #d4d4d4;
-      border: none;
+      background-color: #ffffff; /* White background for search */
+      color: #1a1a1a;
+      border: 1px solid #cccccc; /* Thin gray border */
       padding: 8px 15px;
       font-family: 'Courier New', Courier, monospace;
       font-size: 16px;
-      border-radius: 20px;
+      border-radius: 4px;        /* Slightly more rectangular for minimalist feel */
       outline: none;
       width: 200px;
     }
     #search-input::placeholder {
-      color: #666;
+      color: #999999;
     }
 
     #sub-title {
@@ -83,28 +129,28 @@
       margin-bottom: 25px;
     }
     .article-title {
-      font-size: 18px;
-      font-weight: normal;
+      font-size: 20px;
+      font-weight: 500;
       font-family: 'Times New Roman', serif;
-      color: #e6e6e6;
+      color: #111111;            /* Deep black/gray for titles */
       text-decoration: none;
       display: block;
       margin-bottom: 5px;
-      line-height: 1.3;
+      line-height: 1.4;
     }
     .article-title:hover {
       text-decoration: underline;
     }
     .article-meta {
-      font-size: 12px;
-      color: #8b949e;
+      font-size: 13px;
+      color: #666666;            /* Muted gray for meta data */
       margin: 5px 0;
+      letter-spacing: 1px;
     }
     .article-link {
       font-size: 12px;
-      color: #555;
+      color: #999999;
       text-decoration: none;
-      word-break: break-all;
     }
     .article-link:hover {
       color: #888;
@@ -160,8 +206,9 @@
 <body>
 
   <div class="header">
-    <a href="/" class="title-group" style="text-decoration: none; cursor: pointer;">
-      <img src="assets/Paperlytic.png" alt="Paperlytic Logo" class="site-logo">
+    <a href="/" class="title-group logo-wrapper">
+      <span class="css-logo-icon"></span>
+      <span class="css-logo-text">Paperlytic</span>
     </a>
 
     <div class="controls">
@@ -175,7 +222,7 @@
 
   <script>
     const SUPABASE_URL = "https://wmdmqpttcqooqmhfprrm.supabase.co/rest/v1/articles";
-    const SUPABASE_KEY = "sb_publishable_lix4VU1K7-D1iExVmaL5lw_qRWPeggY";
+    const SUPABASE_KEY = "sb_publishable_EU2FR9zzKlBXBEkmpSS7YA_w1dEf5G8";
 
     let currentOffset = 0;
     const limit = 50; // Fetch 50 papers at a time
