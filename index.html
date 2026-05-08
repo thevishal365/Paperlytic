@@ -111,12 +111,6 @@
       border-bottom: 2px solid #111111; 
     }
 
-    .made-by {
-      font-family: 'Arial', sans-serif;
-      font-size: 14px;
-      color: #2b5c8f; /* 'Made by' ke liye muted grey color */
-    }
-
     #search-input {
       background-color: #ffffff; /* White background for search */
       color: #1a1a1a;
@@ -171,43 +165,48 @@
       color: #888;
     }
 
-    @media (max-width: 600px){
-      .nav-menu {
-        margin-bottom: 10px;
-      }
+    @media (max-width: 600px) {
       body { padding: 15px; }
       
       .header {
         flex-direction: column; 
         align-items: center;
         border-bottom: none; 
-        margin-bottom: 10px;
-        gap: 15px;
-      }
-      .title-group { gap: 10px; }
-      
-      .css-logo-text {
-        font-size: 26px;
+        margin-bottom: 15px;
+        gap: 0;
       }
 
-      .css-logo-icon {
-        width: 24px;
-        height: 30px;
-      }
-
-      .article-title {
-        font-size: 16px;
-        line-height: 1.3;
+      .title-group { 
+        margin-bottom: 15px; 
       }
       
+      .nav-menu {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 0; 
+        margin-bottom: 20px; 
+        border-top: 1px solid #d1d9e0; 
+        border-bottom: 1px solid #d1d9e0; 
+        gap: 20px;
+      }
+
+      .nav-menu a { border-bottom: none; }
+      .nav-menu a:hover { border-bottom: none; color: #111111; }
+
       .controls {
         flex-direction: column;
         width: 100%;
       }
+
       #search-input {
         width: 100%; 
         border-radius: 20px; 
+        padding: 10px 15px;
       }
+
+      .css-logo-text { font-size: 26px; }
+      .css-logo-icon { width: 24px; height: 30px; }
+      .article-title { font-size: 16px; line-height: 1.3; }
     }
 
     .loading-text {
@@ -248,7 +247,6 @@
       
       <a href="mailto:vishaltenet@gmail.com">Contact</a>
 
-      <a href="https://x.com/thevishal365" target="_blank" rel="noopener noreferrer">Made by Vishal</a>
     </nav>
 
     <div class="controls">
