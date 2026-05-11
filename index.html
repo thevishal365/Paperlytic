@@ -3,6 +3,7 @@
 <head>
   <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paperlytic</title>
   <link rel="icon" href="assets/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
@@ -14,222 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Eagle+Lake&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500&display=swap" rel="stylesheet">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      overflow-wrap: break-word; 
-    }
-
-    html, body {
-      max-width: 100vw;
-      overflow-x: hidden;
-    }
-
-    body {
-      background-color: #f0f4f8; /* Minimalist style light gray/off white */
-      color: #1a202c;            /* Dark text for high readability */
-      font-family: 'Courier New', Courier, monospace;
-      padding: 20px;
-      margin: 0;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #d1d9e0; /* Subtle light border */
-      padding-bottom: 20px;
-      margin-bottom: 25px;
-    }
-
-    .title-group {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .logo-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: #111111;
-      cursor: pointer;
-    }
-
-    .css-logo-icon {
-      width: 25px;
-      height: 30px;
-      border: 3px solid currentColor;
-      border-radius: 4px;
-      position: relative;
-      clip-path: polygon(0% 0%, 65% 0%, 100% 25%, 100% 100%, 0% 100%);
-    }
-
-    .css-logo-icon::before {
-      content: '';
-      position: absolute;
-      top: -3px;
-      right: -3px;
-      width: 10px;
-      height: 10px;
-      border-left: 3px solid currentColor;
-      border-bottom: 3px solid currentColor;
-      border-bottom-left-radius: 3px;
-      background-color: #f0f4f8; /* Match this with your body background */
-    }
-
-    .css-logo-text {
-      font-family: 'Arial', sans-serif;
-      font-size: 30px;
-      font-weight: 400;
-      letter-spacing: -1px;
-      margin: 0;
-    }
-
-    .controls {
-      display: flex;
-      gap: 10px;
-    }
-
-    .nav-menu {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .nav-menu a {
-      color: #2b5c8f; /* Blue link color */
-      text-decoration: none;
-      font-family: 'Arial', sans-serif;
-      font-size: 14px;
-      border-bottom: 1px solid #2b5c8f; /* Thin underline */
-      padding-bottom: 2px;
-    }
-
-    .nav-menu a:hover {
-      color: #111111; /* Hover dark/black */
-      border-bottom: 2px solid #111111; 
-    }
-
-    #search-input {
-      background-color: #ffffff; /* White background for search */
-      color: #1a1a1a;
-      border: 1px solid #cccccc; /* Thin gray border */
-      padding: 8px 15px;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 16px;
-      border-radius: 4px;        /* Slightly more rectangular for minimalist feel */
-      outline: none;
-      width: 200px;
-    }
-    #search-input::placeholder {
-      color: #999999;
-    }
-
-    #sub-title {
-      color: #8b949e;
-      font-size: 16px;
-      margin-bottom: 25px;
-      font-family: 'Courier New', Courier, monospace;
-      display: none; 
-    }
-    
-    .article {
-      margin-bottom: 25px;
-    }
-    .article-title {
-      font-size: 20px;
-      font-weight: 500;
-      font-family: 'Times New Roman', serif;
-      color: #111111;            /* Deep black/gray for titles */
-      text-decoration: none;
-      display: block;
-      margin-bottom: 5px;
-      line-height: 1.4;
-    }
-    .article-title:hover {
-      text-decoration: underline;
-    }
-    .article-meta {
-      font-size: 13px;
-      color: #666666;            /* Muted gray for meta data */
-      margin: 5px 0;
-      letter-spacing: 1px;
-    }
-    .article-link {
-      font-size: 12px;
-      color: #999999;
-      text-decoration: none;
-    }
-    .article-link:hover {
-      color: #888;
-    }
-
-    @media (max-width: 1024px) {
-      body { padding: 15px; }
-      
-      .header {
-        flex-direction: column; 
-        align-items: center;
-        border-bottom: none; 
-        margin-bottom: 15px;
-        gap: 0;
-      }
-
-      .title-group { 
-        margin-bottom: 15px; 
-      }
-      
-      .nav-menu {
-        width: 100%;
-        justify-content: center;
-        padding: 12px 0; 
-        margin-bottom: 20px; 
-        border-top: 1px solid #d1d9e0; 
-        border-bottom: 1px solid #d1d9e0; 
-        gap: 20px;
-      }
-
-      .nav-menu a { border-bottom: none; }
-      .nav-menu a:hover { border-bottom: none; color: #111111; }
-
-      .controls {
-        flex-direction: column;
-        width: 100%;
-      }
-
-      #search-input {
-        width: 100%; 
-        border-radius: 20px; 
-        padding: 10px 15px;
-      }
-
-      .css-logo-text { font-size: 26px; }
-      .css-logo-icon { width: 21px; height: 26px; }
-      .article-title { font-size: 16px; line-height: 1.3; }
-    }
-
-    .loading-text {
-      color: #8b949e; 
-      font-family: 'Courier New', Courier, monospace; 
-      font-size: 16px; 
-      text-transform: none !important;
-      text-align: left; 
-      margin-top: 20px; 
-    }
-
-    .loading-dots::after {
-      content: '';
-      animation: animate-dots 1.5s infinite;
-    }
-
-    @keyframes animate-dots {
-      0% { content: ''; }
-      25% { content: '.'; }
-      50% { content: '..'; }
-      75%, 100% { content: '...'; }
-    }
-  </style>
+  <link rel="stylesheet" href="main.css">
 </head>
 <body>
 
@@ -240,13 +26,9 @@
     </a>
 
     <nav class="nav-menu">
-  
       <a href="/">Home</a>
-      
       <a href="/about.html">About</a>
-      
       <a href="mailto:vishaltenet@gmail.com">Contact</a>
-
     </nav>
 
     <div class="controls">
@@ -263,67 +45,53 @@
     const SUPABASE_KEY = "sb_publishable_EU2FR9zzKlBXBEkmpSS7YA_w1dEf5G8";
 
     let currentOffset = 0;
-    const limit = 50; // Fetch 50 papers at a time
+    const limit = 50; 
     let isLoading = false;
     let hasMore = true;
     let currentSearchTerm = "";
 
-    // 1. Fetch the initial batch on page load
     fetchArticles(false);
 
-    // 2. Scroll Tracker (Detects if the user has reached the bottom)
     window.addEventListener('scroll', () => {
-      // Fetch new data when the user is near the bottom of the page
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
         fetchArticles(false);
       }
     });
 
-    // 3. Smart Search Function
     function filterData() {
       const searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
       const subTitle = document.getElementById('sub-title');
-
-      if (searchQuery === currentSearchTerm) return; // Do not reload for the same search query
-      
+      if (searchQuery === currentSearchTerm) return;
       currentSearchTerm = searchQuery;
-
       if (currentSearchTerm === "") {
         subTitle.style.display = "none";
       } else {
         subTitle.innerText = `Search: "${currentSearchTerm}"`;
         subTitle.style.display = "block";
       }
-      
-      // Clear previous data and fetch fresh results for a new search
       fetchArticles(true);
     }
 
-    // 4. Main Fetch Engine
     function fetchArticles(isNewSearch = false) {
       if (isLoading) return;
-      if (!hasMore && !isNewSearch) return; // Do not fetch if there is no more data available
+      if (!hasMore && !isNewSearch) return;
 
       isLoading = true;
       const container = document.getElementById('feed-container');
 
       if (isNewSearch || currentOffset === 0) {
-     currentOffset = 0;
-     hasMore = true;
-     container.innerHTML = ""; // Clear the screen for a new search or initial load
-    }
+        currentOffset = 0;
+        hasMore = true;
+        container.innerHTML = ""; 
+      }
 
-      // Show loading text at the bottom
       const loadingDiv = document.createElement('div');
       loadingDiv.id = "scroll-loading";
       loadingDiv.innerHTML = `<p class="loading-text" style="text-align: center;">Loading more<span class="loading-dots"></span></p>`;
       container.appendChild(loadingDiv);
 
-      // Construct the URL (Server-side search + Pagination + Timestamp sorting)
       let fetchUrl = `${SUPABASE_URL}?select=*&order=created_at.desc&limit=${limit}&offset=${currentOffset}`;
-
       if (currentSearchTerm !== "") {
-        // Query Supabase to search within the title or journal
         fetchUrl += `&or=(title.ilike.*${encodeURIComponent(currentSearchTerm)}*,journal.ilike.*${encodeURIComponent(currentSearchTerm)}*)`;
       }
 
@@ -341,18 +109,15 @@
       })
       .then(data => {
         document.getElementById('scroll-loading')?.remove(); 
-
         if (data.length < limit) {
-          hasMore = false; // No further papers remaining in the database
+          hasMore = false;
         }
-
         if (data.length === 0 && isNewSearch) {
            container.innerHTML = "<p>No articles found.</p>";
         } else {
            displayArticles(data);
-           currentOffset += limit; // Increment the offset for the next load
+           currentOffset += limit;
         }
-
         isLoading = false;
       })
       .catch(err => {
@@ -369,15 +134,12 @@
 
     function displayArticles(articles) {
       const container = document.getElementById('feed-container');
-
       articles.forEach(row => {
         const date = row.date || "Unknown Date";
         const title = row.title || "No Title";
         const journal = row.journal || "Unknown Journal";
         const doi = row.doi || "";
-
         const doiLink = doi ? "https://doi.org/" + doi : "#";
-
         const articleDiv = document.createElement('div');
         articleDiv.className = 'article';
         articleDiv.innerHTML = `
