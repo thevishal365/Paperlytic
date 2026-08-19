@@ -1,0 +1,141 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+/* Self-hosted fonts (latin subset, only the weights this app uses).
+   Each @fontsource file ships font-display: swap. */
+@import "@fontsource/instrument-serif/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+
+/* Metric-compatible fallbacks so the swap to the real fonts is imperceptible. */
+@font-face {
+  font-family: "Instrument Serif Fallback";
+  src:
+    local("Georgia"),
+    local("Times New Roman");
+  size-adjust: 75%;
+  ascent-override: 132%;
+  descent-override: 41%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Plex Sans Fallback";
+  src:
+    local("Arial"),
+    local("Helvetica"),
+    local("Liberation Sans");
+  size-adjust: 107%;
+  ascent-override: 96%;
+  descent-override: 26%;
+  line-gap-override: 0%;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-rule: var(--rule);
+  --font-display: "Instrument Serif", "Instrument Serif Fallback", Georgia, serif;
+  --font-sans: "IBM Plex Sans", "Plex Sans Fallback", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+:root {
+  --radius: 0.25rem;
+  --background: oklch(0.968 0.011 90);
+  --foreground: oklch(0.21 0.015 60);
+  --card: oklch(0.985 0.007 90);
+  --card-foreground: oklch(0.21 0.015 60);
+  --popover: oklch(0.985 0.007 90);
+  --popover-foreground: oklch(0.21 0.015 60);
+  --primary: oklch(0.45 0.13 35);
+  --primary-foreground: oklch(0.98 0.01 90);
+  --secondary: oklch(0.93 0.014 90);
+  --secondary-foreground: oklch(0.28 0.02 60);
+  --muted: oklch(0.93 0.014 90);
+  --muted-foreground: oklch(0.52 0.017 70);
+  --accent: oklch(0.4 0.06 220);
+  --accent-foreground: oklch(0.98 0.01 90);
+  --destructive: oklch(0.52 0.19 27);
+  --destructive-foreground: oklch(0.98 0.01 90);
+  --border: oklch(0.88 0.015 85);
+  --rule: oklch(0.82 0.018 85);
+  --input: oklch(0.88 0.015 85);
+  --ring: oklch(0.45 0.13 35);
+}
+
+.dark {
+  --background: oklch(0.19 0.012 70);
+  --foreground: oklch(0.94 0.01 90);
+  --card: oklch(0.23 0.013 70);
+  --card-foreground: oklch(0.94 0.01 90);
+  --popover: oklch(0.23 0.013 70);
+  --popover-foreground: oklch(0.94 0.01 90);
+  --primary: oklch(0.72 0.13 45);
+  --primary-foreground: oklch(0.19 0.012 70);
+  --secondary: oklch(0.27 0.013 70);
+  --secondary-foreground: oklch(0.94 0.01 90);
+  --muted: oklch(0.27 0.013 70);
+  --muted-foreground: oklch(0.68 0.015 80);
+  --accent: oklch(0.72 0.08 220);
+  --accent-foreground: oklch(0.19 0.012 70);
+  --destructive: oklch(0.65 0.18 27);
+  --destructive-foreground: oklch(0.98 0.01 90);
+  --border: oklch(1 0 0 / 12%);
+  --rule: oklch(1 0 0 / 18%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.72 0.13 45);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 22%, transparent);
+  }
+}
+
+@utility rule-grain {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 27px,
+    color-mix(in oklab, var(--rule) 45%, transparent) 27px 28px
+  );
+}
