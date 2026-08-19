@@ -1,26 +1,154 @@
 # Paperlytic
 
-Fix this with new design
+> A minimal, hourly-updated index of newly published academic research.
 
-This project was built with [Lovable](https://lovable.dev).
+Paperlytic collects newly published research papers from Crossref and presents them in a clean, searchable feed.
 
-**Live app**: https://paperlytic.lovable.app
+## Features
 
-## Build with Lovable
+* Hourly research paper updates
+* Crossref API integration
+* Duplicate DOI filtering
+* Search by title or journal
+* Direct DOI links
+* Research feed with infinite scrolling
+* Clean and simple interface
+* About and Contact pages
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/909804df-28df-4a3b-ab4a-ed1ede11b0ea).
+## How It Works
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+```text
+Crossref API
+     ↓
+Paper ingestion
+     ↓
+Data processing
+     ↓
+Duplicate filtering
+     ↓
+Database
+     ↓
+Paperlytic frontend
+```
+
+## Tech Stack
+
+### Frontend
+
+* React
+* TypeScript
+* Vite
+* TanStack Router
+* shadcn/ui
+
+### Backend
+
+* Google Apps Script
+* Crossref API
+* Supabase
+
+## Project Structure
+
+```text
+Paperlytic/
+├── backend/
+│   ├── Code.js
+│   ├── Config.js
+│   ├── CrossrefService.js
+│   ├── SheetRepository.js
+│   ├── SupabaseService.js
+│   ├── Utils.js
+│   ├── WebApp.js
+│   ├── .clasp.json
+│   └── appsscript.json
+│
+├── public/
+├── src/
+│   ├── components/
+│   ├── hooks/
+│   ├── lib/
+│   └── routes/
+│
+├── .lovable/
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
+└── README.md
+```
+
+## Backend
+
+The backend handles research paper collection and data processing.
+
+### Main Services
+
+* `CrossrefService.js`
+  Fetches research paper data from Crossref.
+
+* `SheetRepository.js`
+  Handles spreadsheet-related data operations.
+
+* `SupabaseService.js`
+  Handles database operations through Supabase.
+
+* `Config.js`
+  Reads application settings from Google Apps Script Script Properties.
+
+* `WebApp.js`
+  Provides the web/API interface.
+
+* `Utils.js`
+  Contains shared utility functions.
+
+## Configuration
+
+The backend uses Google Apps Script Script Properties for configuration.
+
+Required properties:
+
+```text
+SUPABASE_URL
+SUPABASE_KEY
+SUPABASE_SECRET
+SHEET_NAME
+CROSSREF_MAILTO
+```
+
+Do not store secret values directly in the source code.
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+### Requirements
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+* Node.js
+* npm
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Start the Development Server
+
+```bash
 npm run dev
 ```
+
+The local development server will be provided by Vite.
+
+## Data Source
+
+Paperlytic uses the Crossref API as its main source for newly registered academic publications.
+
+## Live Application
+
+[paperlytic.lovable.app](https://paperlytic.lovable.app)
+
+## Project Status
+
+Paperlytic is an actively developed academic research indexing project.
+
+## License
+
+License information will be added later.
