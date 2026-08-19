@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 const TITLE = "The Best Google Scholar Alternatives for Real-Time Research";
 const DESCRIPTION =
   "Compare the best Google Scholar alternatives for live research — Semantic Scholar, ResearchGate, PubMed, and Paperlytic's hourly paper feed.";
-const URL = "https://paperlytic.lovable.app/guides/google-scholar-alternatives";
+const URL = "https://paperlytic.netlify.app/guides/google-scholar-alternatives";
 
 export const Route = createFileRoute("/guides/google-scholar-alternatives")({
   head: () => ({
@@ -29,14 +29,14 @@ export const Route = createFileRoute("/guides/google-scholar-alternatives")({
           mainEntityOfPage: URL,
           datePublished: "2026-08-10",
           dateModified: "2026-08-10",
-          image: "https://paperlytic.lovable.app/apple-touch-icon.png",
+          image: "https://paperlytic.netlify.app/apple-touch-icon.png",
           author: { "@type": "Organization", name: "Paperlytic" },
           publisher: {
             "@type": "Organization",
             name: "Paperlytic",
             logo: {
               "@type": "ImageObject",
-              url: "https://paperlytic.lovable.app/apple-touch-icon.png",
+              url: "https://paperlytic.netlify.app/apple-touch-icon.png",
             },
           },
         }),

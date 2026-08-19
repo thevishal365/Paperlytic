@@ -17,10 +17,10 @@ export const Route = createFileRoute("/about")({
           "The pipeline behind Paperlytic: Crossref API, an hourly serverless worker, Postgres storage, and a minimal live frontend.",
       },
       { property: "og:type", content: "article" },
-      { property: "og:url", content: "https://paperlytic.lovable.app/about" },
+      { property: "og:url", content: "https://paperlytic.netlify.app/about" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://paperlytic.lovable.app/about" }],
+    links: [{ rel: "canonical", href: "https://paperlytic.netlify.app/about" }],
   }),
 
   component: About,

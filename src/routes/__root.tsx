@@ -14,7 +14,6 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import instrumentSerif400 from "@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url";
 import plexSans400 from "@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FEED_CACHE_VERSION } from "../lib/articles";
 
 function NotFoundComponent() {
@@ -43,7 +42,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+
   }, [error]);
 
   return (

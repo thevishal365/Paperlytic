@@ -20,10 +20,10 @@ export const Route = createFileRoute("/")({
         content: "Newly published academic papers from Crossref, updated hourly.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://paperlytic.lovable.app/" },
+      { property: "og:url", content: "https://paperlytic.netlify.app/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://paperlytic.lovable.app/" }],
+    links: [{ rel: "canonical", href: "https://paperlytic.netlify.app/" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: "Paperlytic",
-            url: "https://paperlytic.lovable.app/",
+            url: "https://paperlytic.netlify.app/",
             description:
               "A minimal, hourly-updated index of newly published academic papers from Crossref.",
           },
@@ -40,8 +40,8 @@ export const Route = createFileRoute("/")({
             "@context": "https://schema.org",
             "@type": "Organization",
             name: "Paperlytic",
-            url: "https://paperlytic.lovable.app/",
-            logo: "https://paperlytic.lovable.app/apple-touch-icon.png",
+            url: "https://paperlytic.netlify.app/",
+            logo: "https://paperlytic.netlify.app/apple-touch-icon.png",
           },
         ]),
       },

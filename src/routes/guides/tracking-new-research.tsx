@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 const TITLE = "How to Track New Research Papers in Real Time";
 const DESCRIPTION =
   "Automated research feeds vs. manual Google Scholar and PubMed searches — why hourly indexing beats a paper search engine you re-check by hand.";
-const URL = "https://paperlytic.lovable.app/guides/tracking-new-research";
+const URL = "https://paperlytic.netlify.app/guides/tracking-new-research";
 
 export const Route = createFileRoute("/guides/tracking-new-research")({
   head: () => ({
@@ -29,14 +29,14 @@ export const Route = createFileRoute("/guides/tracking-new-research")({
           mainEntityOfPage: URL,
           datePublished: "2026-08-10",
           dateModified: "2026-08-10",
-          image: "https://paperlytic.lovable.app/apple-touch-icon.png",
+          image: "https://paperlytic.netlify.app/apple-touch-icon.png",
           author: { "@type": "Organization", name: "Paperlytic" },
           publisher: {
             "@type": "Organization",
             name: "Paperlytic",
             logo: {
               "@type": "ImageObject",
-              url: "https://paperlytic.lovable.app/apple-touch-icon.png",
+              url: "https://paperlytic.netlify.app/apple-touch-icon.png",
             },
           },
         }),

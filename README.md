@@ -69,7 +69,6 @@ Paperlytic/
 │   ├── lib/
 │   └── routes/
 │
-├── .lovable/
 ├── package.json
 ├── vite.config.ts
 ├── tsconfig.json
@@ -143,7 +142,7 @@ Paperlytic uses the Crossref API as its main source for newly registered academi
 
 ## Live Application
 
-[paperlytic.lovable.app](https://paperlytic.lovable.app)
+[paperlytic.netlify.app](https://paperlytic.netlify.app)
 
 ## Project Status
 
