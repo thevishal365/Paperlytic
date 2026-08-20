@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
-import { articlesInfiniteQueryOptions, formatDate, BASE_FEED_KEY } from "@/lib/articles";
+import { articlesInfiniteQueryOptions, formatDate, BASE_FEED_KEY, filterArticlesForFrontend } from "@/lib/articles";
 import { getInitialFeed } from "@/lib/articles.functions";
 
 export const Route = createFileRoute("/")({
@@ -99,7 +99,11 @@ function Index() {
     });
 
   const articles = useMemo(() => data?.pages.flat() ?? [], [data]);
-  const hasData = articles.length > 0;
+  const visibleArticles = useMemo(
+    () => filterArticlesForFrontend(articles),
+    [articles],
+  );
+  const hasData = visibleArticles.length > 0;
 
   useEffect(() => {
     const el = sentinel.current;
@@ -158,7 +162,7 @@ function Index() {
         )}
 
         <ol>
-          {articles.map((a, i) => {
+          {visibleArticles.map((a, i) => {
             const doi = a.doi ?? "";
             const href = doi ? `https://doi.org/${doi}` : "#";
             return (
@@ -173,7 +177,7 @@ function Index() {
                     {formatDate(a.date)}
                   </span>
                   <div>
-                    <h2 className="font-display text-xl leading-snug decoration-primary/60 underline-offset-4 group-hover:underline sm:text-2xl">
+                    <h2 className="font-mono text-base leading-relaxed decoration-primary/60 underline-offset-4 group-hover:underline sm:text-lg">
                       {a.title || "Untitled"}
                     </h2>
                     <p className="mt-1.5 text-sm text-muted-foreground">

@@ -1,4 +1,5 @@
 import { infiniteQueryOptions } from "@tanstack/react-query";
+import { franc } from "franc";
 
 export const PAPERLYTIC_API = "https://wmdmqpttcqooqmhfprrm.supabase.co/rest/v1/articles";
 export const PAPERLYTIC_KEY = "sb_publishable_EU2FR9zzKlBXBEkmpSS7YA_w1dEf5G8";
@@ -20,6 +21,30 @@ export type Article = {
   title?: string | null;
   journal?: string | null;
 };
+
+export function filterArticlesForFrontend(articles: Article[]): Article[] {
+  return articles.filter((article) => {
+    const title = article.title?.trim();
+
+    // 1. Title must exist.
+    if (!title) return false;
+
+    // 2. Hide ALL-CAPS titles.
+    const letters = title.match(/[A-Za-z]/g);
+    const hasLetters = letters !== null && letters.length > 0;
+
+    if (hasLetters && title === title.toUpperCase()) {
+      return false;
+    }
+
+    // 3. Keep only English titles.
+    const language = franc(title, {
+      minLength: 10,
+    });
+
+    return language === "eng";
+  });
+}
 
 export async function fetchArticles(offset: number, search: string): Promise<Article[]> {
   let url = `${PAPERLYTIC_API}?select=*&order=created_at.desc&limit=${PAGE_SIZE}&offset=${offset}`;
