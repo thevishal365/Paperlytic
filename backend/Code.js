@@ -58,12 +58,14 @@ function fetchLatestDOIsInternal_() {
 
         knownDois.add(article.doi);
 
-        newRows.push([
+        const row = [
           article.date,
           article.doi,
           article.title,
           article.journal
-        ]);
+        ];
+        row.is_frontend_visible = isFrontendVisible_(article.title);
+        newRows.push(row);
       }
 
       subjectsSucceeded++;
@@ -126,4 +128,21 @@ function fetchLatestDOIsInternal_() {
     subjectsSucceeded: subjectsSucceeded,
     subjectsFailed: subjectsFailed
   };
+}
+
+/**
+ * Determines whether an article title should be shown in the frontend.
+ *
+ * @param {*} title Article title.
+ * @return {boolean} Whether the title is frontend-visible.
+ * @private
+ */
+function isFrontendVisible_(title) {
+  const normalizedTitle = String(title || "").trim();
+
+  if (!normalizedTitle) {
+    return false;
+  }
+
+  return !(/\p{L}/u.test(normalizedTitle) && normalizedTitle === normalizedTitle.toUpperCase());
 }

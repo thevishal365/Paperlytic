@@ -21,7 +21,8 @@ function sendToSupabase_(rows, config) {
         date: row[0],
         doi: row[1],
         title: row[2],
-        journal: row[3]
+        journal: row[3],
+        is_frontend_visible: row.is_frontend_visible
       };
     });
 
