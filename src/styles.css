@@ -14,9 +14,7 @@
 /* Metric-compatible fallbacks so the swap to the real fonts is imperceptible. */
 @font-face {
   font-family: "Instrument Serif Fallback";
-  src:
-    local("Georgia"),
-    local("Times New Roman");
+  src: local("Georgia"), local("Times New Roman");
   size-adjust: 75%;
   ascent-override: 132%;
   descent-override: 41%;
@@ -25,10 +23,7 @@
 
 @font-face {
   font-family: "Plex Sans Fallback";
-  src:
-    local("Arial"),
-    local("Helvetica"),
-    local("Liberation Sans");
+  src: local("Arial"), local("Helvetica"), local("Liberation Sans");
   size-adjust: 107%;
   ascent-override: 96%;
   descent-override: 26%;
@@ -36,7 +31,6 @@
 }
 
 @custom-variant dark (&:is(.dark *));
-
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);

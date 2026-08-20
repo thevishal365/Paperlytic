@@ -10,9 +10,7 @@ function getResearchSheet_() {
   const sheet = spreadsheet.getSheetByName(config.sheetName);
 
   if (!sheet) {
-    throw new Error(
-      'Sheet not found. Check SHEET_NAME: ' + config.sheetName
-    );
+    throw new Error("Sheet not found. Check SHEET_NAME: " + config.sheetName);
   }
 
   return sheet;
@@ -33,11 +31,9 @@ function getExistingDois_(sheet) {
     return dois;
   }
 
-  const values = sheet
-    .getRange(2, 2, lastRow - 1, 1)
-    .getValues();
+  const values = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
 
-  values.forEach(function(row) {
+  values.forEach(function (row) {
     const doi = normalizeDoi_(row[0]);
 
     if (doi) {
@@ -56,18 +52,14 @@ function getExistingDois_(sheet) {
  */
 function ensureSheetHeader_(sheet) {
   const expectedHeaders = APP_CONFIG.expectedHeaders;
-  const currentHeaders = sheet
-    .getRange(1, 1, 1, expectedHeaders.length)
-    .getDisplayValues()[0];
+  const currentHeaders = sheet.getRange(1, 1, 1, expectedHeaders.length).getDisplayValues()[0];
 
-  const matches = expectedHeaders.every(function(header, index) {
+  const matches = expectedHeaders.every(function (header, index) {
     return currentHeaders[index] === header;
   });
 
   if (!matches) {
-    sheet
-      .getRange(1, 1, 1, expectedHeaders.length)
-      .setValues([expectedHeaders]);
+    sheet.getRange(1, 1, 1, expectedHeaders.length).setValues([expectedHeaders]);
   }
 }
 
@@ -81,9 +73,7 @@ function ensureSheetHeader_(sheet) {
 function insertRowsIntoSheet_(sheet, rows) {
   sheet.insertRowsAfter(1, rows.length);
 
-  sheet
-    .getRange(2, 1, rows.length, 4)
-    .setValues(rows);
+  sheet.getRange(2, 1, rows.length, 4).setValues(rows);
 
   applyDoiLinks_(sheet, rows);
 }
@@ -96,20 +86,18 @@ function insertRowsIntoSheet_(sheet, rows) {
  * @private
  */
 function applyDoiLinks_(sheet, rows) {
-  const richTextValues = rows.map(function(row) {
+  const richTextValues = rows.map(function (row) {
     const doi = String(row[1]);
 
     return [
       SpreadsheetApp.newRichTextValue()
         .setText(doi)
-        .setLinkUrl('https://doi.org/' + doi)
-        .build()
+        .setLinkUrl("https://doi.org/" + doi)
+        .build(),
     ];
   });
 
-  sheet
-    .getRange(2, 2, richTextValues.length, 1)
-    .setRichTextValues(richTextValues);
+  sheet.getRange(2, 2, richTextValues.length, 1).setRichTextValues(richTextValues);
 }
 
 /**
@@ -123,9 +111,6 @@ function pruneOldRows_(sheet, maxRows) {
   const currentLastRow = sheet.getLastRow();
 
   if (currentLastRow > maxRows) {
-    sheet.deleteRows(
-      maxRows + 1,
-      currentLastRow - maxRows
-    );
+    sheet.deleteRows(maxRows + 1, currentLastRow - maxRows);
   }
 }

@@ -9,11 +9,7 @@
 function fetchWithRetry_(url, options) {
   let lastError = null;
 
-  for (
-    let attempt = 1;
-    attempt <= APP_CONFIG.maxAttempts;
-    attempt++
-  ) {
+  for (let attempt = 1; attempt <= APP_CONFIG.maxAttempts; attempt++) {
     try {
       const response = UrlFetchApp.fetch(url, options);
       const statusCode = response.getResponseCode();
@@ -22,24 +18,19 @@ function fetchWithRetry_(url, options) {
         return response;
       }
 
-      lastError = new Error(
-        'HTTP ' + statusCode + ': ' +
-        response.getContentText().slice(0, 500)
-      );
+      lastError = new Error("HTTP " + statusCode + ": " + response.getContentText().slice(0, 500));
     } catch (error) {
       lastError = error;
     }
 
     if (attempt < APP_CONFIG.maxAttempts) {
-      const delayMs =
-        APP_CONFIG.initialRetryDelayMs *
-        Math.pow(2, attempt - 1);
+      const delayMs = APP_CONFIG.initialRetryDelayMs * Math.pow(2, attempt - 1);
 
       Utilities.sleep(delayMs);
     }
   }
 
-  throw lastError || new Error('HTTP request failed.');
+  throw lastError || new Error("HTTP request failed.");
 }
 
 /**
@@ -51,7 +42,7 @@ function fetchWithRetry_(url, options) {
  * @private
  */
 function parseNonNegativeInteger_(value, fallback) {
-  if (value === null || value === undefined || value === '') {
+  if (value === null || value === undefined || value === "") {
     return fallback;
   }
 

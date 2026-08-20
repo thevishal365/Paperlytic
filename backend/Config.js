@@ -16,31 +16,31 @@ const APP_CONFIG = {
   initialRetryDelayMs: 1000,
   supabaseBatchSize: 100,
   maxApiRows: 1000,
-  expectedHeaders: ['Date', 'DOI', 'Title', 'Journal'],
+  expectedHeaders: ["Date", "DOI", "Title", "Journal"],
   subjects: [
-    'Physics',
-    'Chemistry',
-    'Biology',
-    'Mathematics',
-    'Biochemistry',
-    'Nanoscience',
-    'Quantum Mechanics',
-    'Computer Science',
-    'Artificial Intelligence',
-    'Machine Learning',
-    'Quantum Computing',
-    'Medicine',
-    'Public Health',
-    'Genetics',
-    'Microbiology',
-    'Data Science',
-    'Neuroscience',
-    'Psychology',
-    'Sociology',
-    'Economics',
-    'Deep Learning',
-    'Robotics'
-  ]
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Mathematics",
+    "Biochemistry",
+    "Nanoscience",
+    "Quantum Mechanics",
+    "Computer Science",
+    "Artificial Intelligence",
+    "Machine Learning",
+    "Quantum Computing",
+    "Medicine",
+    "Public Health",
+    "Genetics",
+    "Microbiology",
+    "Data Science",
+    "Neuroscience",
+    "Psychology",
+    "Sociology",
+    "Economics",
+    "Deep Learning",
+    "Robotics",
+  ],
 };
 
 /**
@@ -53,21 +53,19 @@ function getConfig_() {
   const properties = PropertiesService.getScriptProperties();
 
   const config = {
-    supabaseUrl: properties.getProperty('SUPABASE_URL'),
-    supabaseKey: properties.getProperty('SUPABASE_KEY'),
-    supabaseSecret: properties.getProperty('SUPABASE_SECRET'),
-    sheetName: properties.getProperty('SHEET_NAME'),
-    crossrefMailto: properties.getProperty('CROSSREF_MAILTO')
+    supabaseUrl: properties.getProperty("SUPABASE_URL"),
+    supabaseKey: properties.getProperty("SUPABASE_KEY"),
+    supabaseSecret: properties.getProperty("SUPABASE_SECRET"),
+    sheetName: properties.getProperty("SHEET_NAME"),
+    crossrefMailto: properties.getProperty("CROSSREF_MAILTO"),
   };
 
-  const missing = Object.keys(config).filter(function(key) {
+  const missing = Object.keys(config).filter(function (key) {
     return !config[key] || !String(config[key]).trim();
   });
 
   if (missing.length > 0) {
-    throw new Error(
-      'Missing required Script Properties: ' + missing.join(', ')
-    );
+    throw new Error("Missing required Script Properties: " + missing.join(", "));
   }
 
   return config;

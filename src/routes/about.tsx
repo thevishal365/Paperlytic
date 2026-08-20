@@ -55,16 +55,14 @@ function About() {
       <SiteHeader />
 
       <main className="mx-auto max-w-3xl px-5 py-14">
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">
-          {"\n"}
-        </p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">{"\n"}</p>
         <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">
           An automated, real-time feed of the latest academic research.
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
-          Paperlytic tracks and aggregates newly registered papers across physics,
-          biology, medicine, computer science and beyond — refreshed hourly, with
-          nothing between you and the source.
+          Paperlytic tracks and aggregates newly registered papers across physics, biology,
+          medicine, computer science and beyond — refreshed hourly, with nothing between you and the
+          source.
         </p>
 
         <ol className="mt-12 border-t border-rule">
@@ -76,17 +74,15 @@ function About() {
               <span className="font-mono text-xs text-primary">{s.n}</span>
               <div>
                 <h2 className="font-display text-2xl leading-snug">{s.title}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {s.body}
-                </p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
               </div>
             </li>
           ))}
         </ol>
 
         <p className="mt-10 font-display text-xl leading-relaxed">
-          No clutter. No unnecessary steps. Just a clean pipeline bringing the
-          latest research straight to your screen.
+          No clutter. No unnecessary steps. Just a clean pipeline bringing the latest research
+          straight to your screen.
         </p>
       </main>
     </div>

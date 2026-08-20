@@ -7,14 +7,12 @@ const PROVEN_PARATEXT_TITLE_PATTERN_ =
 /**
  * Matches page strings consisting solely of Roman numerals (e.g. "i-ii", "iv").
  */
-const ROMAN_NUMERAL_PAGE_PATTERN_ =
-  /^[ivxlcdm]+(?:[-–][ivxlcdm]+)?$/i;
+const ROMAN_NUMERAL_PAGE_PATTERN_ = /^[ivxlcdm]+(?:[-–][ivxlcdm]+)?$/i;
 
 /**
  * Matches English language code prefixes ("en", "eng", "EN").
  */
-const ENGLISH_LANGUAGE_PREFIX_ =
-  /^en/i;
+const ENGLISH_LANGUAGE_PREFIX_ = /^en/i;
 
 /**
  * Fetches one Crossref subject with retry handling.
@@ -26,28 +24,28 @@ const ENGLISH_LANGUAGE_PREFIX_ =
  */
 function fetchCrossrefSubject_(subject, config) {
   const url =
-    'https://api.crossref.org/works' +
-    '?query=' + encodeURIComponent(subject) +
-    '&filter=type:journal-article' +
-    '&sort=created' +
-    '&order=desc' +
-    '&rows=' + APP_CONFIG.crossrefRowsPerSubject;
+    "https://api.crossref.org/works" +
+    "?query=" +
+    encodeURIComponent(subject) +
+    "&filter=type:journal-article" +
+    "&sort=created" +
+    "&order=desc" +
+    "&rows=" +
+    APP_CONFIG.crossrefRowsPerSubject;
 
   const response = fetchWithRetry_(url, {
-    method: 'get',
+    method: "get",
     headers: {
-      'User-Agent':
-        'Research Feed/1.0 (mailto:' + config.crossrefMailto + ')'
+      "User-Agent": "Research Feed/1.0 (mailto:" + config.crossrefMailto + ")",
     },
-    muteHttpExceptions: true
+    muteHttpExceptions: true,
   });
 
   const statusCode = response.getResponseCode();
 
   if (statusCode !== 200) {
     throw new Error(
-      'Crossref returned HTTP ' + statusCode + ': ' +
-      response.getContentText().slice(0, 500)
+      "Crossref returned HTTP " + statusCode + ": " + response.getContentText().slice(0, 500),
     );
   }
 
@@ -56,14 +54,11 @@ function fetchCrossrefSubject_(subject, config) {
   try {
     body = JSON.parse(response.getContentText());
   } catch (error) {
-    throw new Error('Crossref returned invalid JSON.');
+    throw new Error("Crossref returned invalid JSON.");
   }
 
-  if (
-    !body.message ||
-    !Array.isArray(body.message.items)
-  ) {
-    throw new Error('Crossref response has an unexpected structure.');
+  if (!body.message || !Array.isArray(body.message.items)) {
+    throw new Error("Crossref response has an unexpected structure.");
   }
 
   return body.message.items;
@@ -81,7 +76,7 @@ function normalizeCrossrefArticle_(item) {
     return null;
   }
 
-  if (item.type !== 'journal-article') {
+  if (item.type !== "journal-article") {
     return null;
   }
 
@@ -110,16 +105,15 @@ function normalizeCrossrefArticle_(item) {
   }
 
   const journal =
-    item['container-title'] &&
-    item['container-title'].length
-      ? String(item['container-title'][0]).trim()
-      : 'Unknown Journal';
+    item["container-title"] && item["container-title"].length
+      ? String(item["container-title"][0]).trim()
+      : "Unknown Journal";
 
   return {
     date: extractCreatedDate_(item),
     doi: doi,
     title: title,
-    journal: journal
+    journal: journal,
   };
 }
 
@@ -131,10 +125,10 @@ function normalizeCrossrefArticle_(item) {
  * @private
  */
 function normalizeDoi_(value) {
-  return String(value || '')
+  return String(value || "")
     .trim()
-    .replace(/^https?:\/\/doi\.org\//i, '')
-    .replace(/^doi:\s*/i, '')
+    .replace(/^https?:\/\/doi\.org\//i, "")
+    .replace(/^doi:\s*/i, "")
     .toLowerCase();
 }
 
@@ -146,30 +140,30 @@ function normalizeDoi_(value) {
  * @private
  */
 function cleanCrossrefTitle_(value) {
-  return String(value || '')
-    .replace(/<[^>]*>/g, '')
-    .replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi, function(match, entity) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi, function (match, entity) {
       const lowerEntity = entity.toLowerCase();
 
-      if (lowerEntity === 'amp') return '&';
-      if (lowerEntity === 'lt') return '<';
-      if (lowerEntity === 'gt') return '>';
-      if (lowerEntity === 'quot') return '"';
-      if (lowerEntity === 'apos') return "'";
-      if (lowerEntity === 'nbsp') return ' ';
+      if (lowerEntity === "amp") return "&";
+      if (lowerEntity === "lt") return "<";
+      if (lowerEntity === "gt") return ">";
+      if (lowerEntity === "quot") return '"';
+      if (lowerEntity === "apos") return "'";
+      if (lowerEntity === "nbsp") return " ";
 
-      if (lowerEntity.indexOf('#x') === 0) {
+      if (lowerEntity.indexOf("#x") === 0) {
         return String.fromCodePoint(parseInt(lowerEntity.slice(2), 16));
       }
 
-      if (lowerEntity.indexOf('#') === 0) {
+      if (lowerEntity.indexOf("#") === 0) {
         return String.fromCodePoint(parseInt(lowerEntity.slice(1), 10));
       }
 
       return match;
     })
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/[\r\n]+/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -181,12 +175,7 @@ function cleanCrossrefTitle_(value) {
  * @private
  */
 function extractCreatedDate_(item) {
-  const dateTime =
-    item &&
-    item.created &&
-    item.created['date-time'];
+  const dateTime = item && item.created && item.created["date-time"];
 
-  return dateTime
-    ? String(dateTime).split('T')[0]
-    : null;
+  return dateTime ? String(dateTime).split("T")[0] : null;
 }

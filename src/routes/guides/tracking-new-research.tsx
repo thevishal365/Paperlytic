@@ -80,16 +80,12 @@ function Guide() {
       <SiteHeader />
 
       <main className="mx-auto max-w-3xl px-5 py-14">
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">
-          Guide
-        </p>
-        <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">
-          {TITLE}
-        </h1>
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">Guide</p>
+        <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">{TITLE}</h1>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
-          Most researchers still check a search engine by hand and hope nothing
-          slipped through. Here's how automated feeds compare with manual
-          searches on Google Scholar and PubMed — and how to combine them.
+          Most researchers still check a search engine by hand and hope nothing slipped through.
+          Here's how automated feeds compare with manual searches on Google Scholar and PubMed — and
+          how to combine them.
         </p>
 
         <ol className="mt-12 border-t border-rule">
@@ -101,9 +97,7 @@ function Guide() {
               <span className="font-mono text-xs text-primary">{s.n}</span>
               <div>
                 <h2 className="font-display text-2xl leading-snug">{s.title}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {s.body}
-                </p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
               </div>
             </li>
           ))}

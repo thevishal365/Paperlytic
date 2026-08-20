@@ -85,16 +85,12 @@ function Guide() {
       <SiteHeader />
 
       <main className="mx-auto max-w-3xl px-5 py-14">
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">
-          Guide
-        </p>
-        <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">
-          {TITLE}
-        </h1>
+        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">Guide</p>
+        <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">{TITLE}</h1>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
-          Google Scholar is the best-known research search engine, but it is not
-          the fastest way to find new work. Compare the strongest alternatives
-          and see how an hourly feed fits the stack.
+          Google Scholar is the best-known research search engine, but it is not the fastest way to
+          find new work. Compare the strongest alternatives and see how an hourly feed fits the
+          stack.
         </p>
 
         <ol className="mt-12 border-t border-rule">
@@ -106,9 +102,7 @@ function Guide() {
               <span className="font-mono text-xs text-primary">{s.n}</span>
               <div>
                 <h2 className="font-display text-2xl leading-snug">{s.title}</h2>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {s.body}
-                </p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
               </div>
             </li>
           ))}

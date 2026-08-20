@@ -6,14 +6,14 @@ Paperlytic collects newly published research papers from Crossref and presents t
 
 ## Features
 
-* Hourly research paper updates
-* Crossref API integration
-* Duplicate DOI filtering
-* Search by title or journal
-* Direct DOI links
-* Research feed with infinite scrolling
-* Clean and simple interface
-* About and Contact pages
+- Hourly research paper updates
+- Crossref API integration
+- Duplicate DOI filtering
+- Search by title or journal
+- Direct DOI links
+- Research feed with infinite scrolling
+- Clean and simple interface
+- About and Contact pages
 
 ## How It Works
 
@@ -35,17 +35,17 @@ Paperlytic frontend
 
 ### Frontend
 
-* React
-* TypeScript
-* Vite
-* TanStack Router
-* shadcn/ui
+- React
+- TypeScript
+- Vite
+- TanStack Router
+- shadcn/ui
 
 ### Backend
 
-* Google Apps Script
-* Crossref API
-* Supabase
+- Google Apps Script
+- Crossref API
+- Supabase
 
 ## Project Structure
 
@@ -81,22 +81,22 @@ The backend handles research paper collection and data processing.
 
 ### Main Services
 
-* `CrossrefService.js`
+- `CrossrefService.js`
   Fetches research paper data from Crossref.
 
-* `SheetRepository.js`
+- `SheetRepository.js`
   Handles spreadsheet-related data operations.
 
-* `SupabaseService.js`
+- `SupabaseService.js`
   Handles database operations through Supabase.
 
-* `Config.js`
+- `Config.js`
   Reads application settings from Google Apps Script Script Properties.
 
-* `WebApp.js`
+- `WebApp.js`
   Provides the web/API interface.
 
-* `Utils.js`
+- `Utils.js`
   Contains shared utility functions.
 
 ## Configuration
@@ -119,8 +119,8 @@ Do not store secret values directly in the source code.
 
 ### Requirements
 
-* Node.js
-* npm
+- Node.js
+- npm
 
 ### Install Dependencies
 
