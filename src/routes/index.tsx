@@ -134,6 +134,8 @@ function Index() {
           <label className="relative block w-full sm:w-72">
             <span className="sr-only">Search papers</span>
             <input
+              id="paper-search"
+              name="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search title or journal"
