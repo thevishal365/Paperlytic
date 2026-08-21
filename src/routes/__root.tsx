@@ -165,6 +165,19 @@ function RootComponent() {
     <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <footer className="mt-16 border-t border-rule py-6 text-center text-sm text-muted-foreground">
+        <span>
+          built by -{" "}
+          <a
+            href="https://x.com/thevishal365"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            Vishal
+          </a>
+        </span>
+      </footer>
     </PersistQueryClientProvider>
   );
 }

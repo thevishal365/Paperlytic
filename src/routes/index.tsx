@@ -1,8 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
-import { articlesInfiniteQueryOptions, formatDate, BASE_FEED_KEY, filterArticlesForFrontend } from "@/lib/articles";
+import {
+  articlesInfiniteQueryOptions,
+  formatDate,
+  BASE_FEED_KEY,
+  filterArticlesForFrontend,
+} from "@/lib/articles";
 import { getInitialFeed } from "@/lib/articles.functions";
 
 export const Route = createFileRoute("/")({
@@ -68,29 +73,32 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { initialFeed } = Route.useLoaderData();
+  const pageDisplaySize = 10;
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
-  const sentinel = useRef<HTMLDivElement | null>(null);
+  const [displayCount, setDisplayCount] = useState(pageDisplaySize);
 
   useEffect(() => {
     const t = setTimeout(() => setQuery(search.trim()), 350);
     return () => clearTimeout(t);
   }, [search]);
 
+  useEffect(() => {
+    setDisplayCount(pageDisplaySize);
+  }, [query]);
+
   const isBaseFeed = query === "";
 
-  const seed = useMemo(
-    () =>
-      isBaseFeed && initialFeed
-        ? {
-            data: { pages: [initialFeed.articles], pageParams: [0] },
-            updatedAt: initialFeed.fetchedAt,
-          }
-        : undefined,
-    [isBaseFeed, initialFeed],
-  );
+  const seed = useMemo(() => {
+    if (!isBaseFeed) return undefined;
 
-  const { data, error, isPending, isFetchingNextPage, hasNextPage, fetchNextPage } =
+    return {
+      data: { pages: [initialFeed?.articles ?? []], pageParams: [0] },
+      updatedAt: initialFeed?.fetchedAt ?? 0,
+    };
+  }, [isBaseFeed, initialFeed]);
+
+  const { data, error, isPending, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useInfiniteQuery({
       ...articlesInfiniteQueryOptions(query),
       initialData: seed?.data,
@@ -99,26 +107,15 @@ function Index() {
     });
 
   const articles = useMemo(() => data?.pages.flat() ?? [], [data]);
-  const visibleArticles = useMemo(
-    () => filterArticlesForFrontend(articles),
-    [articles],
-  );
+  const visibleArticles = useMemo(() => filterArticlesForFrontend(articles), [articles]);
+  const displayedArticles = visibleArticles.slice(0, displayCount);
   const hasData = visibleArticles.length > 0;
+  const hasMoreArticles = displayedArticles.length < visibleArticles.length || hasNextPage;
 
-  useEffect(() => {
-    const el = sentinel.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          void fetchNextPage();
-        }
-      },
-      { rootMargin: "600px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  const handleShowMore = () => {
+    setDisplayCount((count) => count + pageDisplaySize);
+    if (hasNextPage) void fetchNextPage();
+  };
 
   return (
     <div className="min-h-screen">
@@ -127,8 +124,8 @@ function Index() {
       <main className="mx-auto max-w-5xl px-5 pb-24">
         <section className="grid gap-6 border-b border-rule py-10 sm:grid-cols-[1fr_auto] sm:items-end">
           <div>
-            <h1 className="max-w-xl font-display text-3xl leading-tight sm:text-4xl">
-              Newly published research, indexed every hour.
+            <h1 className="max-w-xl font-sans text-3xl font-normal leading-tight text-foreground/80 sm:text-4xl">
+              Latest Academic Research Feed
             </h1>
             <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
               {query && `Search — ${query}`}
@@ -162,7 +159,7 @@ function Index() {
         )}
 
         <ol>
-          {visibleArticles.map((a, i) => {
+          {displayedArticles.map((a, i) => {
             const doi = a.doi ?? "";
             const href = doi ? `https://doi.org/${doi}` : "#";
             return (
@@ -191,9 +188,20 @@ function Index() {
           })}
         </ol>
 
-        <div ref={sentinel} />
+        {hasMoreArticles && (
+          <div className="flex justify-center py-10">
+            <button
+              type="button"
+              onClick={handleShowMore}
+              disabled={isFetchingNextPage}
+              className="border border-rule px-5 py-2 font-mono text-xs uppercase tracking-[0.2em] transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isFetchingNextPage ? "Loading" : "Show More"}
+            </button>
+          </div>
+        )}
 
-        {(isPending || isFetchingNextPage) && !hasData && (
+        {(isPending || isFetching) && !hasData && (
           <p className="py-10 text-center font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
             Loading
           </p>
