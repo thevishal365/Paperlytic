@@ -54,7 +54,7 @@ function About() {
     <div className="min-h-screen">
       <SiteHeader />
 
-      <main className="mx-auto max-w-3xl px-5 py-14">
+      <main className="mx-auto max-w-3xl px-5 pt-8 pb-0">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">{"\n"}</p>
         <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">
           An automated, real-time feed of the latest academic research.

@@ -1,11 +1,24 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import { fetchArticles, type Article } from "./articles";
+import type { ArticlePage } from "./articles";
 
 export type InitialFeed = {
-  articles: Article[];
+  articles: ArticlePage["articles"];
+  hasMore: boolean;
   fetchedAt: number;
 };
+
+type ArticlesPageInput = {
+  offset: number;
+  search: string;
+};
+
+export const fetchArticlesPage = createServerFn({ method: "GET" })
+  .validator((input: ArticlesPageInput) => input)
+  .handler(async ({ data }): Promise<ArticlePage> => {
+    const { fetchVisibleArticlesPage } = await import("./articles.server");
+    return fetchVisibleArticlesPage(data.offset, data.search);
+  });
 
 /**
  * Server-rendered first page of the default (unsearched) feed.
@@ -15,8 +28,9 @@ export type InitialFeed = {
 export const getInitialFeed = createServerFn({ method: "GET" }).handler(
   async (): Promise<InitialFeed | null> => {
     try {
-      const articles = await fetchArticles(0, "");
-      return { articles, fetchedAt: Date.now() };
+      const { fetchVisibleArticlesPage } = await import("./articles.server");
+      const page = await fetchVisibleArticlesPage(0, "");
+      return { ...page, fetchedAt: Date.now() };
     } catch (error) {
       // SSR must never break the page: fall back to client-side fetching.
       console.error(error);

@@ -2,12 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
-import {
-  articlesInfiniteQueryOptions,
-  formatDate,
-  BASE_FEED_KEY,
-  filterArticlesForFrontend,
-} from "@/lib/articles";
+import { articlesInfiniteQueryOptions, formatDate, BASE_FEED_KEY } from "@/lib/articles";
 import { getInitialFeed } from "@/lib/articles.functions";
 
 export const Route = createFileRoute("/")({
@@ -93,7 +88,15 @@ function Index() {
     if (!isBaseFeed) return undefined;
 
     return {
-      data: { pages: [initialFeed?.articles ?? []], pageParams: [0] },
+      data: {
+        pages: [
+          {
+            articles: initialFeed?.articles ?? [],
+            hasMore: initialFeed?.hasMore ?? false,
+          },
+        ],
+        pageParams: [0],
+      },
       updatedAt: initialFeed?.fetchedAt ?? 0,
     };
   }, [isBaseFeed, initialFeed]);
@@ -106,11 +109,10 @@ function Index() {
       placeholderData: keepPreviousData,
     });
 
-  const articles = useMemo(() => data?.pages.flat() ?? [], [data]);
-  const visibleArticles = useMemo(() => filterArticlesForFrontend(articles), [articles]);
-  const displayedArticles = visibleArticles.slice(0, displayCount);
-  const hasData = visibleArticles.length > 0;
-  const hasMoreArticles = displayedArticles.length < visibleArticles.length || hasNextPage;
+  const articles = useMemo(() => data?.pages.flatMap((page) => page.articles) ?? [], [data]);
+  const displayedArticles = articles.slice(0, displayCount);
+  const hasData = articles.length > 0;
+  const hasMoreArticles = displayedArticles.length < articles.length || hasNextPage;
 
   const handleShowMore = () => {
     setDisplayCount((count) => count + pageDisplaySize);
@@ -118,13 +120,13 @@ function Index() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div>
       <SiteHeader />
 
-      <main className="mx-auto max-w-5xl px-5 pb-24">
+      <main className="mx-auto max-w-5xl px-5 pb-0">
         <section className="grid gap-6 border-b border-rule py-10 sm:grid-cols-[1fr_auto] sm:items-end">
           <div>
-            <h1 className="max-w-xl font-sans text-3xl font-normal leading-tight text-foreground/80 sm:text-4xl">
+            <h1 className="font-display text-4xl leading-tight sm:text-5xl">
               Latest Academic Research Feed
             </h1>
             <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -179,7 +181,9 @@ function Index() {
                     </h2>
                     <p className="mt-1.5 text-sm text-muted-foreground">
                       <span className="text-foreground/70">{a.journal || "Unknown journal"}</span>
-                      {doi && <span className="ml-2 font-mono text-xs text-primary">{doi}</span>}
+                      {doi && (
+                        <span className="ml-2 break-all font-mono text-xs text-primary">{doi}</span>
+                      )}
                     </p>
                   </div>
                 </a>
@@ -189,7 +193,7 @@ function Index() {
         </ol>
 
         {hasMoreArticles && (
-          <div className="flex justify-center py-10">
+          <div className="flex justify-center pt-10">
             <button
               type="button"
               onClick={handleShowMore}

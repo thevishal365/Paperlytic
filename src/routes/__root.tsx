@@ -15,6 +15,7 @@ import appCss from "../styles.css?url";
 import instrumentSerif400 from "@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url";
 import plexSans400 from "@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2?url";
 import { FEED_CACHE_VERSION } from "../lib/articles";
+import { navLinkClass, navTypographyClass } from "../components/SiteHeader";
 
 function NotFoundComponent() {
   return (
@@ -166,13 +167,13 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <footer className="mt-16 border-t border-rule py-6 text-center text-sm text-muted-foreground">
-        <span>
+        <span className={navTypographyClass}>
           built by -{" "}
           <a
             href="https://x.com/thevishal365"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline"
+            className={navLinkClass}
           >
             Vishal
           </a>
