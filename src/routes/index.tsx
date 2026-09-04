@@ -126,8 +126,8 @@ function Index() {
       <main className="mx-auto max-w-5xl px-5 pb-0">
         <section className="grid gap-6 border-b border-rule py-10 sm:grid-cols-[1fr_auto] sm:items-end">
           <div>
-            <h1 className="font-display text-4xl leading-tight sm:text-5xl">
-              Latest Academic Research Feed
+            <h1 className="font-display text-[clamp(1.5rem,8vw,2.25rem)] leading-tight whitespace-nowrap sm:text-5xl">
+              Recently Published Research
             </h1>
             <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
               {query && `Search — ${query}`}
@@ -206,12 +206,6 @@ function Index() {
         )}
 
         {(isPending || isFetching) && !hasData && (
-          <p className="py-10 text-center font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Loading
-          </p>
-        )}
-
-        {isFetchingNextPage && hasData && (
           <p className="py-10 text-center font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
             Loading
           </p>

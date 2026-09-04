@@ -30,13 +30,21 @@ export type ArticlePage = {
 
 export function formatDate(value?: string | null) {
   if (!value) return "Undated";
-  const d = new Date(value);
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  const d = dateOnly
+    ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+    : new Date(value);
   if (Number.isNaN(d.getTime())) return "Undated";
-  return d.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  if (
+    dateOnly &&
+    (d.getFullYear() !== Number(dateOnly[1]) ||
+      d.getMonth() !== Number(dateOnly[2]) - 1 ||
+      d.getDate() !== Number(dateOnly[3]))
+  ) {
+    return "Undated";
+  }
+  const month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getMonth()];
+  return `${String(d.getDate()).padStart(2, "0")} ${month} ${d.getFullYear()}`;
 }
 
 export function articlesInfiniteQueryOptions(search: string) {
@@ -45,8 +53,8 @@ export function articlesInfiniteQueryOptions(search: string) {
     queryKey: ["articles", term] as const,
     queryFn: ({ pageParam }) => fetchArticlesPage({ data: { offset: pageParam, search: term } }),
     initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.hasMore ? allPages.length * PAGE_SIZE : undefined,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+      lastPage.hasMore ? lastPageParam + PAGE_SIZE : undefined,
     maxPages: MAX_PAGES,
     // Stale-while-revalidate: cached pages render instantly, a refresh runs
     // in the background once the data is older than a minute.

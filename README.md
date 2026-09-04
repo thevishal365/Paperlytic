@@ -2,50 +2,58 @@
 
 > A minimal, hourly-updated index of newly published academic research.
 
-Paperlytic collects newly published research papers from Crossref and presents them in a clean, searchable feed.
-
 ## Features
 
-- Hourly research paper updates
-- Crossref API integration
-- Duplicate DOI filtering
+- Server-rendered initial research feed
 - Search by title or journal
+- Show More loading for additional papers
+- Offset-based infinite fetching through TanStack Query
 - Direct DOI links
-- Research feed with infinite scrolling
-- Clean and simple interface
-- About and Contact pages
+- Frontend title and English-language filtering
+- DOI duplicate filtering during ingestion
+- Persisted default-feed query cache
+- About page and research guides
 
 ## How It Works
 
 ```text
 Crossref API
      ↓
-Paper ingestion
+Google Apps Script ingestion
      ↓
-Data processing
+Normalization and duplicate filtering
      ↓
-Duplicate filtering
+Supabase articles table
      ↓
-Database
+TanStack Start server function
      ↓
 Paperlytic frontend
 ```
+
+The frontend reads Supabase through TanStack Start server functions. Google Apps Script separately fetches Crossref records and updates both Supabase and the configured Google Sheet.
 
 ## Tech Stack
 
 ### Frontend
 
-- React
+- React 19
 - TypeScript
 - Vite
+- TanStack Start
 - TanStack Router
-- shadcn/ui
+- TanStack Query
+- Tailwind CSS
+- Radix UI primitives and local UI components
+- `franc` for English-language detection
+- Instrument Serif and IBM Plex fonts
 
 ### Backend
 
 - Google Apps Script
-- Crossref API
-- Supabase
+- Crossref REST API
+- Supabase REST API
+- Google Sheets
+- Netlify
 
 ## Project Structure
 
@@ -63,41 +71,62 @@ Paperlytic/
 │   └── appsscript.json
 │
 ├── public/
+│   └── robots.txt
 ├── src/
 │   ├── components/
+│   │   ├── SiteHeader.tsx
+│   │   └── ui/
 │   ├── hooks/
+│   │   └── use-mobile.tsx
 │   ├── lib/
+│   │   ├── articles.functions.ts
+│   │   ├── articles.server.ts
+│   │   ├── articles.ts
+│   │   ├── error-capture.ts
+│   │   ├── error-page.ts
+│   │   └── utils.ts
 │   └── routes/
+│       ├── __root.tsx
+│       ├── about.tsx
+│       ├── guides/
+│       ├── index.tsx
+│       ├── README.md
+│       └── sitemap[.]xml.ts
 │
 ├── package.json
+├── package-lock.json
 ├── vite.config.ts
 ├── tsconfig.json
+├── netlify.toml
 └── README.md
 ```
 
 ## Backend
 
-The backend handles research paper collection and data processing.
+The backend handles Crossref ingestion and updates the database and spreadsheet.
 
 ### Main Services
 
 - `CrossrefService.js`
-  Fetches research paper data from Crossref.
+  Fetches recent journal articles from Crossref, retries requests, normalizes records, and extracts the created date.
 
 - `SheetRepository.js`
-  Handles spreadsheet-related data operations.
+  Reads the configured sheet, detects existing normalized DOIs, inserts new rows, adds DOI links, and prunes old rows.
 
 - `SupabaseService.js`
-  Handles database operations through Supabase.
+  Sends new article rows to Supabase in controlled batches and ignores duplicate DOI conflicts.
 
 - `Config.js`
-  Reads application settings from Google Apps Script Script Properties.
+  Reads and validates Google Apps Script Script Properties.
+
+- `Code.js`
+  Coordinates ingestion with a script lock, Crossref fetching, Supabase writes, and Sheet updates.
 
 - `WebApp.js`
-  Provides the web/API interface.
+  Provides a separate private JSON endpoint with `offset` and `limit` parameters. The current React frontend does not use this endpoint.
 
 - `Utils.js`
-  Contains shared utility functions.
+  Provides retry and non-negative integer parsing helpers.
 
 ## Configuration
 
@@ -115,6 +144,8 @@ CROSSREF_MAILTO
 
 Do not store secret values directly in the source code.
 
+The Apps Script manifest uses the `Asia/Kolkata` time zone and restricts Web App access to `MYSELF`. The current frontend has no `.env` or `import.meta.env` configuration; its Supabase read constants are defined in `src/lib/articles.ts` without documenting their values here.
+
 ## Development
 
 ### Requirements
@@ -125,7 +156,7 @@ Do not store secret values directly in the source code.
 ### Install Dependencies
 
 ```bash
-npm install
+npm ci
 ```
 
 ### Start the Development Server
@@ -134,11 +165,15 @@ npm install
 npm run dev
 ```
 
-The local development server will be provided by Vite.
+The local development server is provided by Vite.
 
 ## Data Source
 
-Paperlytic uses the Crossref API as its main source for newly registered academic publications.
+Paperlytic's ingestion source is the Crossref API. `CrossrefService.js` requests journal articles for the configured subject list, orders them by Crossref creation time, validates and cleans their metadata, and extracts the date portion of `created.date-time`.
+
+`Code.js` normalizes DOIs and skips duplicates found in the Sheet. New records are sent to Supabase and then inserted into the configured Google Sheet. The frontend reads the Supabase `articles` REST resource through server functions, not through the Apps Script Web App endpoint.
+
+The feed query orders Supabase records by `created_at.desc`, fetches up to 30 rows with an offset, and applies title/journal search filters when a search term is present. Frontend filtering removes missing-title, all-uppercase, and non-English titles.
 
 ## Live Application
 
@@ -150,4 +185,4 @@ Paperlytic is an actively developed academic research indexing project.
 
 ## License
 
-License information will be added later.
+No license is specified in the repository.
