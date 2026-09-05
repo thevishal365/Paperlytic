@@ -8,7 +8,7 @@ export const PAPERLYTIC_KEY = "sb_publishable_EU2FR9zzKlBXBEkmpSS7YA_w1dEf5G8";
 export const PAGE_SIZE = 30;
 
 /** Bump when the persisted article shape changes to invalidate old caches. */
-export const FEED_CACHE_VERSION = "paperlytic-feed-v2";
+export const FEED_CACHE_VERSION = "paperlytic-feed-v3";
 
 /** Cache key for the default, unsearched feed (the only persisted one). */
 export const BASE_FEED_KEY = ["articles", ""] as const;

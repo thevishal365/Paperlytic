@@ -8,8 +8,23 @@ import {
   type ArticlePage,
 } from "./articles";
 
+const FEED_TIME_ZONE = "Asia/Kolkata";
+
+function getTodayInFeedTimeZone(): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: FEED_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
 async function fetchArticles(offset: number, search: string): Promise<Article[]> {
-  let url = `${PAPERLYTIC_API}?select=*&order=created_at.desc&limit=${PAGE_SIZE}&offset=${offset}`;
+  const today = getTodayInFeedTimeZone();
+  let url = `${PAPERLYTIC_API}?select=*&date=lte.${today}&order=date.desc.nullslast,created_at.desc&limit=${PAGE_SIZE}&offset=${offset}`;
   const term = search.trim();
   if (term) {
     const q = encodeURIComponent(term);
