@@ -19,9 +19,9 @@
 ```text
 Crossref API
      ↓
-Google Apps Script ingestion
+Supabase Edge Function ingestion (ingest-crossref)
      ↓
-Normalization and duplicate filtering
+Normalization, validation, and duplicate filtering
      ↓
 Supabase articles table
      ↓
@@ -30,7 +30,7 @@ TanStack Start server function
 Paperlytic frontend
 ```
 
-The frontend reads Supabase through TanStack Start server functions. Google Apps Script separately fetches Crossref records and updates both Supabase and the configured Google Sheet.
+The frontend reads Supabase through TanStack Start server functions. Eleven staggered pg_cron jobs invoke the ingest-crossref Edge Function every hour with explicit two-subject batches; the function fetches Crossref records, validates them, and upserts them into Supabase, using the articles primary key on DOI for deduplication.
 
 ## Tech Stack
 
@@ -49,10 +49,13 @@ The frontend reads Supabase through TanStack Start server functions. Google Apps
 
 ### Backend
 
-- Google Apps Script
+- Supabase Edge Functions
 - Crossref REST API
 - Supabase REST API
-- Google Sheets
+- Supabase Postgres
+- pg_cron
+- pg_net
+- Supabase Vault
 - Netlify
 
 ## Project Structure
@@ -69,6 +72,19 @@ Paperlytic/
 │   ├── WebApp.js
 │   ├── .clasp.json
 │   └── appsscript.json
+│
+├── supabase/
+│   ├── functions/
+│   │   └── ingest-crossref/
+│   │       ├── index.ts
+│   │       ├── config.ts
+│   │       ├── crossref.ts
+│   │       ├── normalize.ts
+│   │       ├── lease.ts
+│   │       └── subjects.ts
+│   ├── migrations/
+│   └── scheduler/
+│       └── ingest-crossref-cron.sql
 │
 ├── public/
 │   └── robots.txt
@@ -103,48 +119,50 @@ Paperlytic/
 
 ## Backend
 
-The backend handles Crossref ingestion and updates the database and spreadsheet.
+The backend handles Crossref ingestion and stores clean records in the database. Ingestion is Supabase-native: eleven staggered pg_cron jobs invoke the ingest-crossref Edge Function every hour (minutes 00, 03, 06, 09, 12, 15, 18, 21, 24, 27, 30 UTC), each with an explicit pair of subjects. A database-backed lease allows only one invocation to write at a time, and every run is logged to ingestion_runs and ingestion_subject_results. The Google Apps Script + Google Sheet ingestion system is retired and is no longer part of production.
 
 ### Main Services
 
-- `CrossrefService.js`
-  Fetches recent journal articles from Crossref, retries requests, normalizes records, and extracts the created date.
+- `index.ts`
+  Entry point for the Edge Function. Authenticates scheduler requests, acquires the ingestion lease, processes one subject batch sequentially with per-subject error isolation, upserts articles, and records run metrics.
 
-- `SheetRepository.js`
-  Reads the configured sheet, detects existing normalized DOIs, inserts new rows, adds DOI links, and prunes old rows.
+- `crossref.ts`
+  Fetches recent journal articles from Crossref, retries requests, and validates response structure.
 
-- `SupabaseService.js`
-  Sends new article rows to Supabase in controlled batches and ignores duplicate DOI conflicts.
+- `normalize.ts`
+  Normalizes DOIs, cleans title markup and entities, checks language and page rules, and extracts the created date.
 
-- `Config.js`
-  Reads and validates Google Apps Script Script Properties.
+- `lease.ts`
+  Provides atomic single-flight lease acquisition and release over the ingestion_lease table.
 
-- `Code.js`
-  Coordinates ingestion with a script lock, Crossref fetching, Supabase writes, and Sheet updates.
+- `subjects.ts`
+  Resolves the subject batch for one invocation from the request body.
 
-- `WebApp.js`
-  Provides a separate private JSON endpoint with `offset` and `limit` parameters. The current React frontend does not use this endpoint.
+- `config.ts`
+  Holds ingestion constants and reads Edge Function configuration.
 
-- `Utils.js`
-  Provides retry and non-negative integer parsing helpers.
+- `ingest-crossref-cron.sql`
+  Defines the eleven staggered hourly pg_cron jobs that call the Edge Function through pg_net with the Vault-stored secret.
+
+- `migrations/`
+  Creates the ingestion_runs, ingestion_subject_results, and ingestion_lease tables used for logging and single-flight protection.
 
 ## Configuration
 
-The backend uses Google Apps Script Script Properties for configuration.
+The backend uses Supabase Edge Function secrets for configuration.
 
-Required properties:
+Custom secrets (set via `supabase secrets set`):
 
 ```text
-SUPABASE_URL
-SUPABASE_KEY
-SUPABASE_SECRET
-SHEET_NAME
 CROSSREF_MAILTO
+INGEST_CRON_SECRET
 ```
+
+SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided automatically by the Supabase platform and are not set manually. The hourly scheduler reads the same ingest secret from Supabase Vault at fire time, so the secret never appears in cron commands or source code.
 
 Do not store secret values directly in the source code.
 
-The Apps Script manifest uses the `Asia/Kolkata` time zone and restricts Web App access to `MYSELF`. The current frontend has no `.env` or `import.meta.env` configuration; its Supabase read constants are defined in `src/lib/articles.ts` without documenting their values here.
+The current frontend has no `.env` or `import.meta.env` configuration; its Supabase read constants are defined in `src/lib/articles.ts` without documenting their values here.
 
 ## Development
 
@@ -169,9 +187,9 @@ The local development server is provided by Vite.
 
 ## Data Source
 
-Paperlytic's ingestion source is the Crossref API. `CrossrefService.js` requests journal articles for the configured subject list, orders them by Crossref creation time, validates and cleans their metadata, and extracts the date portion of `created.date-time`.
+Paperlytic's ingestion source is the Crossref API. The Edge Function requests journal articles for each scheduled subject pair, orders them by Crossref creation time, validates and cleans their metadata, and extracts the date portion of `created.date-time`.
 
-`Code.js` normalizes DOIs and skips duplicates found in the Sheet. New records are sent to Supabase and then inserted into the configured Google Sheet. The frontend reads the Supabase `articles` REST resource through server functions, not through the Apps Script Web App endpoint.
+Each invocation normalizes DOIs and skips duplicates against the articles primary key on DOI, so existing rows are never updated and reruns converge safely. Runs and per-subject results are recorded in ingestion_runs and ingestion_subject_results. The frontend reads the Supabase `articles` REST resource through server functions.
 
 The feed query orders Supabase records by `created_at.desc`, fetches up to 30 rows with an offset, and applies title/journal search filters when a search term is present. Frontend filtering removes missing-title, all-uppercase, and non-English titles.
 
@@ -181,7 +199,7 @@ The feed query orders Supabase records by `created_at.desc`, fetches up to 30 ro
 
 ## Project Status
 
-Paperlytic is an actively developed academic research indexing project.
+Paperlytic is an actively developed academic research indexing project. The Supabase-native ingestion migration is complete: hourly pg_cron batches drive the ingest-crossref Edge Function, and the Google Apps Script + Google Sheet ingestion system is retired. The migration was validated through source-parity checks, manual and concurrency tests, scheduler-path validation, shadow cycles, and GAS-off validation.
 
 ## License
 

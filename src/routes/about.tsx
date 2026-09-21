@@ -30,22 +30,22 @@ const steps = [
   {
     n: "01",
     title: "The data source",
-    body: "The system constantly pulls raw records from the Crossref API, a global registry of newly published academic work.",
+    body: "Paperlytic pulls newly registered academic-paper records directly from the Crossref API, covering research across a wide range of subjects.",
   },
   {
     n: "02",
     title: "The engine",
-    body: "A serverless worker runs autonomously every hour: it fetches new papers, filters duplicate DOIs, and normalises the data before it moves on.",
+    body: "Eleven scheduled ingestion batches run throughout the hour, processing two subjects at a time. A Supabase Edge Function fetches, normalises, validates, and deduplicates the records before they enter the database.",
   },
   {
     n: "03",
     title: "The store",
-    body: "Clean records land in a Postgres database. A daily background job prunes the oldest rows once storage limits are reached, keeping the index light.",
+    body: "Clean records are stored in PostgreSQL, with DOI-based deduplication keeping the feed consistent. A daily maintenance job keeps the latest 100,000 articles while pruning older rows.",
   },
   {
     n: "04",
     title: "The interface",
-    body: "The frontend talks to the database directly, with no middleman server — live search, infinite scroll, and direct DOI links to every paper.",
+    body: "The frontend reads directly from the Supabase database, with live search, infinite scrolling, and direct DOI links to every paper.",
   },
 ];
 
@@ -56,7 +56,7 @@ function About() {
 
       <main className="mx-auto max-w-3xl px-5 pt-8 pb-0">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">{"\n"}</p>
-        <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">
+        <h1 className="mt-3 font-display text-[clamp(1.5rem,8vw,2.25rem)] leading-tight sm:text-5xl">
           An automated, real-time feed of the latest academic research.
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">

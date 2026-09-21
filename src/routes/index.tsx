@@ -127,7 +127,7 @@ function Index() {
         <section className="grid gap-6 border-b border-rule py-10 sm:grid-cols-[1fr_auto] sm:items-end">
           <div>
             <h1 className="font-display text-[clamp(1.5rem,8vw,2.25rem)] leading-tight whitespace-nowrap sm:text-5xl">
-              Recently Published Research
+              Latest Academic Research Papers
             </h1>
             <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
               {query && `Search — ${query}`}

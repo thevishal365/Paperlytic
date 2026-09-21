@@ -1,0 +1,242 @@
+-- DRAFT — DO NOT APPLY. Nothing in this file has been executed.
+-- Installing pg_net, storing Vault secrets, and creating cron jobs are all
+-- live-database changes reserved for an explicit enablement step, executed
+-- strictly in the order below with the verification query after EACH step.
+--
+-- Live state verified read-only just before drafting (CLI metadata only):
+--   * Edge Function `ingest-crossref`: ACTIVE, version 2, verify_jwt=false.
+--     Byte-identical to the audited repo source (SHA-256 per file).
+--     Custom JWT-off auth via INGEST_CRON_SECRET bearer is therefore the
+--     live auth path; scheduler calls need no Supabase JWT.
+--   * Function secrets present (names only, values are API hashes and were
+--     never read): CROSSREF_MAILTO, INGEST_CRON_SECRET, plus platform
+--     SUPABASE_* keys. No other custom secrets.
+--   * Migrations: 20260921101628, 20260921103029, 20260921111659 — all
+--     local = remote. Zero pending.
+--   * pg_cron: installed and working (existing prune_articles_job proves it).
+--   * pg_net: NOT installed (last verified; no read-only re-check path
+--     available — confirm again with the step-4 query before relying).
+--   * supabase_vault: installed (schema verified previously).
+--   * cron.job rows and vault secret rows: NOT listable with available
+--     read-only tooling (no SQL execution path, no Docker for pg_dump).
+--     The pre-execution inventory queries below are therefore MANDATORY,
+--     not optional, at enablement time.
+--
+-- Chosen mechanism: pg_cron + pg_net (Option A).
+-- Why: pg_cron is proven working in this project; pg_net is its native
+-- HTTP companion; Vault holds the scheduler secret server-side so the
+-- INGEST_CRON_SECRET never appears in a cron command or in this repo.
+--
+-- ============================================================
+-- ORDER OF PRODUCTION CHANGES (execute one block at a time)
+-- ============================================================
+--
+-- STEP 1 — inventory (read-only; MUST show only prune_articles_job today).
+--   select jobid, jobname, schedule, active from cron.job order by jobname;
+-- ROLLBACK: none needed (read-only).
+--
+-- STEP 2 — install pg_net.
+--   create extension if not exists pg_net with schema extensions;
+-- VERIFY:
+--   select extname, extversion from pg_extension where extname = 'pg_net';
+-- ROLLBACK:
+--   drop extension if exists pg_net;
+--   (Fails while net.* objects are referenced; re-run VERIFY to confirm.)
+--
+-- STEP 3 — store the scheduler secret in Vault.
+-- The VALUE below is a placeholder. Substitute the real INGEST_CRON_SECRET
+-- (the SAME value configured as the function secret) at execution time in
+-- the SQL editor only. It must never be committed, logged, or pasted here.
+--   select vault.create_secret(
+--     '<INGEST_CRON_SECRET_VALUE>',
+--     'ingest_cron_secret',
+--     'Scheduler bearer for ingest-crossref; referenced by cron, never stored in job text.'
+--   );
+-- VERIFY (metadata only — plaintext never leaves the database):
+--   select name, created_at from vault.secrets where name = 'ingest_cron_secret';
+-- GRANT CHECK — the cron owner role must resolve the secret at fire time.
+-- Run the next line AS the role that will own the jobs; expect exactly 1.
+-- If it returns 0, grant read on the Vault view to that role first, e.g.
+--   grant usage on schema vault to <cron_role>;
+--   grant select on vault.decrypted_secrets to <cron_role>;
+-- (Confirm the actual role/grant syntax against the live Vault
+-- installation at execution; role names differ per project setup.)
+--   select count(*) from vault.decrypted_secrets where name = 'ingest_cron_secret';
+-- ROLLBACK (removes the secret row; confirm Vault function name live):
+--   delete from vault.secrets where name = 'ingest_cron_secret';
+--   select name from vault.secrets where name = 'ingest_cron_secret';
+--   (Expect zero rows.)
+--
+-- STEP 4 — manual cron-style path test (ONE batch, proves Vault -> pg_net
+-- -> function -> logging end to end BEFORE any schedule exists).
+--   select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Physics","Chemistry"]}'::jsonb,
+--     timeout_milliseconds := 120000);
+-- VERIFY (expect one completed run, 2 subject rows, trigger='cron'):
+--   select id, status, trigger, subjects, fetched_count, accepted_count,
+--          duplicate_count, inserted_count, rejected_count, error
+--     from ingestion_runs order by id desc limit 3;
+--   select subject, status, fetched, accepted, duplicates, rejected
+--     from ingestion_subject_results where run_id = <id-from-above> order by subject;
+-- ROLLBACK: none needed (normal ingestion rows; they converge via PK(doi)).
+-- Do NOT proceed to Step 5 unless this test shows status='completed'.
+--
+-- STEP 5 — create the 11 staggered jobs (11 separate statements below).
+-- After EACH statement, confirm it appears:
+--   select jobname, schedule, active from cron.job
+--    where jobname like 'ingest-crossref-batch-%' order by jobname;
+-- Expect 11 rows, schedules 0,3,...,30, all active. prune_articles_job
+-- MUST still be present and untouched — abort if it is not.
+--
+-- GLOBAL LEASE vs BATCH FAN-OUT — READ BEFORE SCHEDULING.
+-- The ingestion lease is intentionally GLOBAL (one row,
+-- lock_name = 'ingest-crossref') and is NOT partitioned per batch.
+-- Simultaneous batch invocations are therefore PROHIBITED: a fan-out of
+-- N concurrent requests would let exactly one batch acquire the lease
+-- while the other N-1 return `skipped` (another_run_is_active),
+-- silently dropping most of the hourly coverage with zero errors.
+-- The 11 hourly batches MUST be STAGGERED (3 minutes apart), each with
+-- an explicit 2-subject body. Never rely on the function default batch
+-- for scheduled ingestion: every cron body lists its subjects explicitly.
+--
+-- OVERLAP BEHAVIOR (by design, not a failure mode):
+-- A 2-subject batch worst case (~96s + DB work) fits the 3-minute slot,
+-- so overlap should be rare. If batch N still holds the lease when batch
+-- N+1 fires, N+1 atomically loses acquisition, inserts a zero-counter
+-- ingestion_runs row (status='skipped', error='another_run_is_active',
+-- subjects=N+1's pair), returns HTTP 200, performs NO Crossref requests,
+-- and touches NO articles. The lease stays with N; N releases best-effort
+-- on completion, else it expires (30-min TTL) for self-healing. Missed
+-- pairs are visible as skipped runs and reconverge next hour via the
+-- articles PRIMARY KEY (doi) conflict-ignore — no data corruption, only
+-- delayed coverage. Alert on: skipped runs outside this pattern, or any
+-- subject pair missing from completed runs for 2+ consecutive hours.
+--
+-- TIMEOUT RATIONALE (verified live): pg_net's default 5s client timeout
+-- fires while the Edge Function is still working — the function continues
+-- server-side (proven: timed-out request 3 still produced completed run 8,
+-- 20/20/0/20 in ~8.88s), but the caller records a false failure and cron
+-- job-run history becomes misleading. Every net.http_post below therefore
+-- sets timeout_milliseconds := 120000, covering the 2-subject worst case
+-- (~96s + DB work) with margin inside the 3-minute stagger slot.
+--
+-- Exact job SQL (minutes 00..30 step 3; identical shape, only schedule
+-- name, minute, and subjects differ):
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-01', '0 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Physics","Chemistry"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-02', '3 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Biology","Mathematics"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-03', '6 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Biochemistry","Nanoscience"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-04', '9 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Quantum Mechanics","Computer Science"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-05', '12 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Artificial Intelligence","Machine Learning"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-06', '15 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Quantum Computing","Medicine"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-07', '18 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Public Health","Genetics"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-08', '21 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Microbiology","Data Science"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-09', '24 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Neuroscience","Psychology"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-10', '27 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Sociology","Economics"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- select cron.schedule(
+--   'ingest-crossref-batch-11', '30 * * * *',
+--   $$ select net.http_post(
+--     url := 'https://wmdmqpttcqooqmhfprrm.supabase.co/functions/v1/ingest-crossref',
+--     headers := jsonb_build_object('Content-Type', 'application/json',
+--       'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'ingest_cron_secret')),
+--     body := '{"trigger":"cron","subjects":["Deep Learning","Robotics"]}'::jsonb,
+--     timeout_milliseconds := 120000); $);
+--
+-- Rollback (full removal, prune_articles_job unaffected):
+--   select cron.unschedule('ingest-crossref-batch-01');
+--   select cron.unschedule('ingest-crossref-batch-02');
+--   select cron.unschedule('ingest-crossref-batch-03');
+--   select cron.unschedule('ingest-crossref-batch-04');
+--   select cron.unschedule('ingest-crossref-batch-05');
+--   select cron.unschedule('ingest-crossref-batch-06');
+--   select cron.unschedule('ingest-crossref-batch-07');
+--   select cron.unschedule('ingest-crossref-batch-08');
+--   select cron.unschedule('ingest-crossref-batch-09');
+--   select cron.unschedule('ingest-crossref-batch-10');
+--   select cron.unschedule('ingest-crossref-batch-11');
+-- Verify removal:
+--   select jobname from cron.job where jobname like 'ingest-crossref-batch-%';
+-- Expect zero rows; prune_articles_job must still be present.

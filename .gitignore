@@ -38,3 +38,5 @@ dist-ssr
 
 # Netlify
 .netlify/
+
+supabase/.temp/
