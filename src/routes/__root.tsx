@@ -8,14 +8,16 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, useMemo, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { AuthProvider } from "@/hooks/use-auth";
 
 import appCss from "../styles.css?url";
-import instrumentSerif400 from "@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url";
-import plexSans400 from "@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2?url";
+import spaceMono400 from "@fontsource/space-mono/files/space-mono-latin-400-normal.woff2?url";
+import rubik400 from "@fontsource/rubik/files/rubik-latin-400-normal.woff2?url";
 import { FEED_CACHE_VERSION } from "../lib/articles";
-import { navLinkClass, navTypographyClass } from "../components/SiteHeader";
 
 function NotFoundComponent() {
   return (
@@ -39,7 +41,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {}, [error]);
@@ -54,15 +56,14 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
+          <Button
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Try again
-          </button>
+          </Button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
@@ -81,12 +82,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { property: "og:site_name", content: "Paperlytic" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         name: "google-site-verification",
         content: "RdXOiHpm2tvnH_-_hMeCGRwEVUuW5jtMvUNnIh7MGes",
       },
     ],
-
     links: [
       {
         rel: "stylesheet",
@@ -97,23 +99,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         as: "font",
         type: "font/woff2",
         crossOrigin: "anonymous",
-        href: instrumentSerif400,
+        href: spaceMono400,
       },
       {
         rel: "preload",
         as: "font",
         type: "font/woff2",
         crossOrigin: "anonymous",
-        href: plexSans400,
+        href: rubik400,
       },
-
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "any" },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
       { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
   }),
-
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -164,21 +164,10 @@ function RootComponent() {
 
   return (
     <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-      <footer className="mt-16 border-t border-rule py-6 text-center text-sm text-muted-foreground">
-        <span className={navTypographyClass}>
-          built by -{" "}
-          <a
-            href="https://x.com/thevishal365"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={navLinkClass}
-          >
-            Vishal
-          </a>
-        </span>
-      </footer>
+      <AuthProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </AuthProvider>
     </PersistQueryClientProvider>
   );
 }

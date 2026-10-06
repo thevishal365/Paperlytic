@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as BookmarksRouteImport } from './routes/bookmarks'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as GuidesGoogleScholarAlternativesRouteImport } from './routes/guides/google-scholar-alternatives'
 import { Route as GuidesTrackingNewResearchRouteImport } from './routes/guides/tracking-new-research'
@@ -23,6 +25,16 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookmarksRoute = BookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -46,6 +58,8 @@ const GuidesTrackingNewResearchRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/guides/google-scholar-alternatives': typeof GuidesGoogleScholarAlternativesRoute
   '/guides/tracking-new-research': typeof GuidesTrackingNewResearchRoute
@@ -53,6 +67,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/guides/google-scholar-alternatives': typeof GuidesGoogleScholarAlternativesRoute
   '/guides/tracking-new-research': typeof GuidesTrackingNewResearchRoute
@@ -61,6 +77,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/guides/google-scholar-alternatives': typeof GuidesGoogleScholarAlternativesRoute
   '/guides/tracking-new-research': typeof GuidesTrackingNewResearchRoute
@@ -70,6 +88,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/bookmarks'
+    | '/profile'
     | '/sitemap.xml'
     | '/guides/google-scholar-alternatives'
     | '/guides/tracking-new-research'
@@ -77,6 +97,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/bookmarks'
+    | '/profile'
     | '/sitemap.xml'
     | '/guides/google-scholar-alternatives'
     | '/guides/tracking-new-research'
@@ -84,6 +106,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/bookmarks'
+    | '/profile'
     | '/sitemap.xml'
     | '/guides/google-scholar-alternatives'
     | '/guides/tracking-new-research'
@@ -92,6 +116,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  BookmarksRoute: typeof BookmarksRoute
+  ProfileRoute: typeof ProfileRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   GuidesGoogleScholarAlternativesRoute: typeof GuidesGoogleScholarAlternativesRoute
   GuidesTrackingNewResearchRoute: typeof GuidesTrackingNewResearchRoute
@@ -111,6 +137,20 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookmarks': {
+      id: '/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof BookmarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -140,6 +180,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  BookmarksRoute: BookmarksRoute,
+  ProfileRoute: ProfileRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   GuidesGoogleScholarAlternativesRoute: GuidesGoogleScholarAlternativesRoute,
   GuidesTrackingNewResearchRoute: GuidesTrackingNewResearchRoute,
