@@ -1,7 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
+import { Clock3, ExternalLink, FileText, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { BookmarkButton } from "@/components/BookmarkButton";
+import { MobileNav } from "@/components/MobileNav";
 import { SiteHeader } from "@/components/SiteHeader";
+import { Button } from "@/components/ui/button";
 import { articlesInfiniteQueryOptions, formatDate, BASE_FEED_KEY } from "@/lib/articles";
 import { getInitialFeed } from "@/lib/articles.functions";
 
@@ -59,7 +63,7 @@ export const Route = createFileRoute("/")({
 
   errorComponent: ({ error }) => (
     <div role="alert" className="p-10 font-mono text-sm">
-      {error.message}
+      {error instanceof Error ? error.message : String(error)}
     </div>
   ),
 
@@ -71,7 +75,9 @@ function Index() {
   const pageDisplaySize = 10;
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(pageDisplaySize);
+  const feedQuery = selectedSubject ?? query;
 
   useEffect(() => {
     const t = setTimeout(() => setQuery(search.trim()), 350);
@@ -80,32 +86,23 @@ function Index() {
 
   useEffect(() => {
     setDisplayCount(pageDisplaySize);
-  }, [query]);
+  }, [feedQuery]);
 
-  const isBaseFeed = query === "";
-
+  const isBaseFeed = feedQuery === "";
   const seed = useMemo(() => {
-    if (!isBaseFeed) return undefined;
-
+    if (!isBaseFeed || !initialFeed) return undefined;
     return {
-      data: {
-        pages: [
-          {
-            articles: initialFeed?.articles ?? [],
-            hasMore: initialFeed?.hasMore ?? false,
-          },
-        ],
-        pageParams: [0],
-      },
-      updatedAt: initialFeed?.fetchedAt ?? 0,
+      pages: [{ articles: initialFeed.articles, hasMore: initialFeed.hasMore }],
+      pageParams: [0],
     };
   }, [isBaseFeed, initialFeed]);
 
   const { data, error, isPending, isFetching, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useInfiniteQuery({
-      ...articlesInfiniteQueryOptions(query),
-      initialData: seed?.data,
-      initialDataUpdatedAt: seed?.updatedAt,
+      ...articlesInfiniteQueryOptions(feedQuery),
+      ...(seed && initialFeed
+        ? { initialData: seed, initialDataUpdatedAt: initialFeed.fetchedAt }
+        : {}),
       placeholderData: keepPreviousData,
     });
 
@@ -119,110 +116,207 @@ function Index() {
     if (hasNextPage) void fetchNextPage();
   };
 
+  const latestDate = displayedArticles[0]?.date;
+  const filters = [
+    "All papers",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Mathematics",
+    "Biochemistry",
+    "Nanoscience",
+    "Quantum Mechanics",
+    "Computer Science",
+    "Artificial Intelligence",
+    "Machine Learning",
+    "Quantum Computing",
+    "Medicine",
+    "Public Health",
+    "Genetics",
+    "Microbiology",
+    "Data Science",
+    "Neuroscience",
+    "Psychology",
+    "Sociology",
+    "Economics",
+    "Deep Learning",
+    "Robotics",
+  ];
+
+  const selectFilter = (filter: string) => {
+    setSearch("");
+    setSelectedSubject(filter === "All papers" ? null : filter);
+  };
+
   return (
-    <div>
-      <SiteHeader />
+    <div className="min-h-screen bg-background pb-20 text-foreground sm:pb-0">
+      <div className="mx-auto min-h-screen max-w-3xl bg-card shadow-sm">
+        <SiteHeader />
+        <main>
+          <section className="sticky top-[65px] z-30 border-b border-border bg-card/95 px-4 pb-4 pt-3 backdrop-blur-lg sm:top-[69px] sm:px-6">
+            <label className="relative block">
+              <span className="sr-only">Search research papers</span>
+              <Search
+                aria-hidden="true"
+                className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+              />
+              <input
+                id="paper-search"
+                name="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search research papers…"
+                className="h-11 w-full rounded-xl border-0 bg-muted pl-11 pr-4 text-sm outline-none ring-ring transition-shadow placeholder:text-muted-foreground focus:ring-2"
+              />
+            </label>
+            <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1">
+              {filters.map((filter) => {
+                const active =
+                  (filter === "All papers" && !selectedSubject && !query) ||
+                  selectedSubject === filter;
+                return (
+                  <Button
+                    key={filter}
+                    type="button"
+                    size="sm"
+                    variant={active ? "default" : "secondary"}
+                    onClick={() => selectFilter(filter)}
+                    className="shrink-0 rounded-full px-4 font-normal"
+                  >
+                    {filter}
+                  </Button>
+                );
+              })}
+            </div>
+          </section>
 
-      <main className="mx-auto max-w-5xl px-5 pb-0">
-        <section className="grid gap-6 border-b border-rule py-10 sm:grid-cols-[1fr_auto] sm:items-end">
-          <div>
-            <h1 className="font-display text-[clamp(1.5rem,8vw,2.25rem)] leading-tight whitespace-nowrap sm:text-5xl">
-              Latest Academic Research Papers
-            </h1>
-            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-              {query && `Search — ${query}`}
-            </p>
-          </div>
+          <section className="px-4 py-5 sm:px-6 sm:py-6">
+            <div className="mb-4 flex items-end justify-between gap-4">
+              <div>
+                <p className="font-display text-[0.6875rem] uppercase text-primary">
+                  Live · updated hourly
+                </p>
+                <h1 className="mt-1 text-xl font-bold sm:text-2xl">
+                  {feedQuery ? `Results for “${feedQuery}”` : "Latest research"}
+                </h1>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-xs font-medium text-muted-foreground">Newest first</p>
+                <p className="mt-1 flex items-center justify-end gap-1 text-[0.6875rem] text-muted-foreground">
+                  <Clock3 className="size-3" />
+                  {latestDate ? formatDate(latestDate) : "Refreshing"}
+                </p>
+              </div>
+            </div>
 
-          <label className="relative block w-full sm:w-72">
-            <span className="sr-only">Search papers</span>
-            <input
-              id="paper-search"
-              name="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search title or journal"
-              className="w-full border-b border-rule bg-transparent pb-2 pr-6 font-mono text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
-            />
-            <span className="pointer-events-none absolute bottom-2 right-0 font-mono text-xs text-primary">
-              /
-            </span>
-          </label>
-        </section>
+            {error && hasData && (
+              <p className="mb-4 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+                Couldn&apos;t refresh — showing saved feed.
+              </p>
+            )}
+            {error && !hasData && <p className="py-10 text-sm text-destructive">{error.message}</p>}
 
-        {error && hasData && (
-          <p className="pt-6 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-            Couldn't refresh — showing saved feed
-          </p>
-        )}
+            <ol className="space-y-3">
+              {displayedArticles.map((article, index) => {
+                const doi = article.doi ?? "";
+                const href = doi ? `https://doi.org/${doi}` : "#";
+                return (
+                  <li
+                    key={`${doi}-${index}`}
+                    className="rise rounded-2xl border border-border bg-card p-4 shadow-sm transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-md sm:p-5"
+                    style={{ animationDelay: `${Math.min(index * 35, 210)}ms` }}
+                  >
+                    <article>
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <span className="max-w-[75%] truncate rounded bg-accent px-2 py-1 font-display text-[0.625rem] font-bold uppercase text-primary">
+                          {article.journal || "Independent research"}
+                        </span>
+                        {index === 0 && (
+                          <span className="rounded bg-signal/10 px-2 py-1 font-display text-[0.625rem] font-bold uppercase text-signal">
+                            Newest
+                          </span>
+                        )}
+                      </div>
+                      <h2 className="text-base font-bold leading-snug text-card-foreground sm:text-lg">
+                        {article.title || "Untitled"}
+                      </h2>
+                      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Clock3 className="size-3.5" />
+                          {formatDate(article.date)}
+                        </span>
+                        <span className="flex min-w-0 items-center gap-1">
+                          <FileText className="size-3.5 shrink-0" />
+                          <span className="max-w-[19rem] truncate">
+                            {doi || "DOI not available"}
+                          </span>
+                        </span>
+                      </div>
+                      <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3">
+                        <span className="font-display text-[0.625rem] uppercase text-muted-foreground">
+                          Paper {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <BookmarkButton article={article} />
+                          {doi && (
+                            <Button asChild variant="feed" size="sm">
+                              <a href={href} target="_blank" rel="noreferrer">
+                                View paper
+                                <ExternalLink />
+                              </a>
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  </li>
+                );
+              })}
+            </ol>
 
-        {error && !hasData && (
-          <p className="py-10 font-mono text-sm text-destructive">{error.message}</p>
-        )}
-
-        <ol>
-          {displayedArticles.map((a, i) => {
-            const doi = a.doi ?? "";
-            const href = doi ? `https://doi.org/${doi}` : "#";
-            return (
-              <li key={`${doi}-${i}`} className="border-b border-rule">
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group grid gap-1 py-6 sm:grid-cols-[5.5rem_1fr] sm:gap-8"
+            {hasMoreArticles && (
+              <div className="flex justify-center pt-6">
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={handleShowMore}
+                  disabled={isFetchingNextPage}
+                  className="w-full rounded-xl sm:w-auto"
                 >
-                  <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                    {formatDate(a.date)}
-                  </span>
-                  <div>
-                    <h2 className="font-mono text-base leading-relaxed decoration-primary/60 underline-offset-4 group-hover:underline sm:text-lg">
-                      {a.title || "Untitled"}
-                    </h2>
-                    <p className="mt-1.5 text-sm text-muted-foreground">
-                      <span className="text-foreground/70">{a.journal || "Unknown journal"}</span>
-                      {doi && (
-                        <span className="ml-2 break-all font-mono text-xs text-primary">{doi}</span>
-                      )}
-                    </p>
-                  </div>
-                </a>
-              </li>
-            );
-          })}
-        </ol>
-
-        {hasMoreArticles && (
-          <div className="flex justify-center pt-10">
-            <button
-              type="button"
-              onClick={handleShowMore}
-              disabled={isFetchingNextPage}
-              className="border border-rule px-5 py-2 font-mono text-xs uppercase tracking-[0.2em] transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isFetchingNextPage ? "Loading" : "Show More"}
-            </button>
-          </div>
-        )}
-
-        {(isPending || isFetching) && !hasData && (
-          <p className="py-10 text-center font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Loading
-          </p>
-        )}
-
-        {!isPending && !error && !hasData && (
-          <p className="py-16 text-center font-display text-2xl text-muted-foreground">
-            No papers match that search.
-          </p>
-        )}
-
-        {!hasNextPage && hasData && (
-          <p className="py-10 text-center font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            End of feed
-          </p>
-        )}
-      </main>
+                  {isFetchingNextPage ? "Loading…" : "Show more papers"}
+                </Button>
+              </div>
+            )}
+            {(isPending || isFetching) && !hasData && (
+              <p className="py-10 text-center text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                Loading
+              </p>
+            )}
+            {!isPending && !error && !hasData && (
+              <p className="py-16 text-center text-sm text-muted-foreground">
+                No papers match that search.
+              </p>
+            )}
+            {!hasNextPage && hasData && (
+              <p className="py-8 text-center font-display text-[0.6875rem] uppercase text-muted-foreground">
+                End of feed
+              </p>
+            )}
+          </section>
+        </main>
+        <footer className="border-t border-border px-4 py-8 text-center text-xs text-muted-foreground sm:px-6">
+          Indexed from Crossref · Updated hourly ·{" "}
+          <a
+            href="https://x.com/thevishal365"
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-foreground"
+          >
+            Built by Vishal
+          </a>
+        </footer>
+        <MobileNav />
+      </div>
     </div>
   );
 }
