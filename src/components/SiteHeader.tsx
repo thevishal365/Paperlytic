@@ -32,8 +32,8 @@ export function SiteHeader() {
           onClick={() => window.scrollTo(0, 0)}
           className="flex min-w-0 items-center gap-2"
         >
+          <img src="/favicon.svg" alt="" className="size-6 shrink-0" />
           <span className="font-display text-lg font-bold leading-none sm:text-xl">Paperlytic</span>
-          <span className="h-2 w-2 rounded-full bg-signal" aria-label="Live feed" />
         </Link>
 
         <nav aria-label="Primary navigation" className="hidden items-center gap-6 sm:flex">
