@@ -304,16 +304,21 @@ function Index() {
             )}
           </section>
         </main>
-        <footer className="border-t border-border px-4 py-8 text-center text-xs text-muted-foreground sm:px-6">
-          Indexed from Crossref · Updated hourly ·{" "}
-          <a
-            href="https://x.com/thevishal365"
-            target="_blank"
-            rel="noreferrer"
-            className="font-medium text-foreground"
-          >
-            Built by Vishal
-          </a>
+        <footer className="border-t border-border px-4 py-8 text-center sm:px-6">
+          <p className="font-display text-sm font-semibold text-primary sm:text-base">
+            Discover new research. Stay curious.
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Designed &amp; built by{" "}
+            <a
+              href="https://x.com/thevishal365"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-sm font-medium text-foreground transition-colors hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Vishal
+            </a>
+          </p>
         </footer>
         <MobileNav />
       </div>
