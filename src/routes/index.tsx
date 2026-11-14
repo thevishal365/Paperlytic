@@ -309,7 +309,7 @@ function Index() {
             Discover new research. Stay curious.
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            Designed &amp; built by{" "}
+            Designed by{" "}
             <a
               href="https://x.com/thevishal365"
               target="_blank"
